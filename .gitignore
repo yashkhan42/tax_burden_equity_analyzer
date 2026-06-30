@@ -1,0 +1,19 @@
+# Virtual environment
+.venv/
+venv/
+
+# Raw data files (too large for GitHub)
+data/raw/
+
+# Jupyter notebook checkpoints
+.ipynb_checkpoints/
+
+# Mac system files
+.DS_Store
+
+# PyCharm settings
+.idea/
+
+# Python cache
+__pycache__/
+*.pyc
