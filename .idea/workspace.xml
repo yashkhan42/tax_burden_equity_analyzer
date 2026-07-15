@@ -4,9 +4,9 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3e72400d-995a-495f-bd6d-046737933e4a" name="Changes" comment="new branch for data cleaning to avoid mix up">
-      <change afterPath="$PROJECT_DIR$/notebooks/cps_data_cleaning.ipynb" afterDir="false" />
+    <list default="true" id="3e72400d-995a-495f-bd6d-046737933e4a" name="Changes" comment="handle missing values in `uhrsworkly`, `occ2010`, and `incretir` columns">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notebooks/cps_data_cleaning.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebooks/cps_data_cleaning.ipynb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -69,61 +69,61 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0004214739692487" />
-      <entry key="MS500" value="1.2853310108512679" />
-      <entry key="S2" value="2.280778463126717" />
-      <entry key="S5" value="3.1754121373016115" />
-      <entry key="S10" value="3.848613682704854" />
-      <entry key="S30" value="4.574376613612266" />
-      <entry key="S60" value="5.011323089728827" />
-      <entry key="M2" value="5.810796291402129" />
-      <entry key="M5" value="9.305810841872251" />
-      <entry key="M10" value="14.528840041336542" />
-      <entry key="M15" value="17.791200596172196" />
-      <entry key="M30" value="22.40874879782431" />
-      <entry key="H1" value="25.408942389314454" />
-      <entry key="H2" value="27.28274839507186" />
-      <entry key="H4" value="33.81802379896679" />
-      <entry key="D1" value="144.57049535529003" />
-      <entry key="W1" value="244.4629417631291" />
+      <entry key="MS100" value="1.0000140409492588" />
+      <entry key="MS500" value="1.1070235355683071" />
+      <entry key="S2" value="1.5719688006144135" />
+      <entry key="S5" value="1.8158424751575983" />
+      <entry key="S10" value="2.203859038644984" />
+      <entry key="S30" value="4.681390498839204" />
+      <entry key="S60" value="8.764277956571126" />
+      <entry key="M2" value="17.06247351544951" />
+      <entry key="M5" value="38.65428294900691" />
+      <entry key="M10" value="69.96254545610756" />
+      <entry key="M15" value="97.50720301437826" />
+      <entry key="M30" value="168.04957200042676" />
+      <entry key="H1" value="263.90964631596745" />
+      <entry key="H2" value="358.83090059302236" />
+      <entry key="H4" value="433.59219084056724" />
+      <entry key="D1" value="614.7664574969252" />
+      <entry key="W1" value="737.8925873926721" />
     </decayedCancelled>
     <decayedSelected>
-      <entry key="MS100" value="0.0" />
-      <entry key="MS500" value="3.3288223061916155E-125" />
-      <entry key="S2" value="7.595784821313182E-32" />
-      <entry key="S5" value="3.566392044455119E-13" />
-      <entry key="S10" value="5.973717352416877E-7" />
-      <entry key="S30" value="0.0093079653543624" />
-      <entry key="S60" value="0.13488645695552648" />
-      <entry key="M2" value="0.6504616155808601" />
-      <entry key="M5" value="2.231095236245427" />
-      <entry key="M10" value="3.7781595844344618" />
-      <entry key="M15" value="4.58975304138458" />
-      <entry key="M30" value="5.635922607841228" />
-      <entry key="H1" value="6.2718434782506405" />
-      <entry key="H2" value="6.625282356313218" />
-      <entry key="H4" value="6.868718752666016" />
-      <entry key="D1" value="8.08315771286326" />
-      <entry key="W1" value="8.835326005504701" />
+      <entry key="MS100" value="1.96305731911817E-235" />
+      <entry key="MS500" value="1.1444230492843204E-47" />
+      <entry key="S2" value="1.8396034125184935E-12" />
+      <entry key="S5" value="2.0871585910798168E-5" />
+      <entry key="S10" value="0.005416444924872172" />
+      <entry key="S30" value="0.33799499002431604" />
+      <entry key="S60" value="1.2198181997804212" />
+      <entry key="M2" value="3.138727234646768" />
+      <entry key="M5" value="8.01749096301849" />
+      <entry key="M10" value="13.521125813231622" />
+      <entry key="M15" value="17.920791698424914" />
+      <entry key="M30" value="28.955577297335605" />
+      <entry key="H1" value="44.63044401640547" />
+      <entry key="H2" value="61.38421816639589" />
+      <entry key="H4" value="74.82257072265716" />
+      <entry key="D1" value="91.28994833419043" />
+      <entry key="W1" value="95.26839758607444" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.9205754572298319" />
-      <entry key="MS500" value="1.2639236010896284" />
-      <entry key="S2" value="2.270942710313462" />
-      <entry key="S5" value="3.1698873909140937" />
-      <entry key="S10" value="3.845258724395234" />
-      <entry key="S30" value="4.581812587015711" />
-      <entry key="S60" value="5.141796920779544" />
-      <entry key="M2" value="6.450795742846063" />
-      <entry key="M5" value="11.517645541008603" />
-      <entry key="M10" value="18.28798574150585" />
-      <entry key="M15" value="22.3646909330396" />
-      <entry key="M30" value="28.03411845600992" />
-      <entry key="H1" value="31.674748722479364" />
-      <entry key="H2" value="33.904796048772816" />
-      <entry key="H4" value="40.685030181838044" />
-      <entry key="D1" value="152.65324388331942" />
-      <entry key="W1" value="253.29819754991155" />
+      <entry key="MS100" value="1.5494536854534587E-5" />
+      <entry key="MS500" value="0.13872626359794749" />
+      <entry key="S2" value="0.9895534840949493" />
+      <entry key="S5" value="1.5186740210692262" />
+      <entry key="S10" value="2.025063398509878" />
+      <entry key="S30" value="4.871967013497033" />
+      <entry key="S60" value="9.853390144279393" />
+      <entry key="M2" value="20.088882558522283" />
+      <entry key="M5" value="46.572093509211136" />
+      <entry key="M10" value="83.37470335109506" />
+      <entry key="M15" value="115.31579141445944" />
+      <entry key="M30" value="196.90696433346952" />
+      <entry key="H1" value="308.4697736608966" />
+      <entry key="H2" value="420.1711195643437" />
+      <entry key="H4" value="508.3896264106724" />
+      <entry key="D1" value="706.0515514812827" />
+      <entry key="W1" value="833.1602629526169" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -191,7 +191,7 @@
       <workItem from="1783994379310" duration="4320000" />
       <workItem from="1784068458436" duration="34000" />
       <workItem from="1784068558862" duration="1841000" />
-      <workItem from="1784070414948" duration="524000" />
+      <workItem from="1784070414948" duration="11029000" />
     </task>
     <task id="LOCAL-00001" summary="add folder structure, gitignore, and placeholder files">
       <option name="closed" value="true" />
@@ -233,7 +233,23 @@
       <option name="project" value="LOCAL" />
       <updated>1783995880431</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="add cps data cleaning notebook fix numpy/pyarrow">
+      <option name="closed" value="true" />
+      <created>1784070992697</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1784070992698</updated>
+    </task>
+    <task id="LOCAL-00007" summary="handle missing values in `uhrsworkly`, `occ2010`, and `incretir` columns">
+      <option name="closed" value="true" />
+      <created>1784076734405</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1784076734405</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -269,6 +285,8 @@
     <MESSAGE value="dd cleaning, load all 6 IRS files, save master CSV to processed" />
     <MESSAGE value="add data dictionary and master dataset" />
     <MESSAGE value="new branch for data cleaning to avoid mix up" />
-    <option name="LAST_COMMIT_MESSAGE" value="new branch for data cleaning to avoid mix up" />
+    <MESSAGE value="add cps data cleaning notebook fix numpy/pyarrow" />
+    <MESSAGE value="handle missing values in `uhrsworkly`, `occ2010`, and `incretir` columns" />
+    <option name="LAST_COMMIT_MESSAGE" value="handle missing values in `uhrsworkly`, `occ2010`, and `incretir` columns" />
   </component>
 </project>
