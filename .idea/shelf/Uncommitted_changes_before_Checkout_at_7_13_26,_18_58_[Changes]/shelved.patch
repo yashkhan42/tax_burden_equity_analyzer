@@ -1,0 +1,17 @@
+Index: data_dictionary.md
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+># Data Dictionary \n\n# Tax Burden Equity Analyzer\n\n## Source files\n- IRS Statistics of Income (SOI), Tables 3.2, 3.3 Tax Return Years 2021-2023\n- Link: https://www.irs.gov/statistics/soi-tax-stats-individual-statistical-tables-by-size-of-adjusted-gross-incom\n- Tax Policy Center, Table T25-0047 for model validation only\n- Link: https://taxpolicycenter.org/model-estimates/t25-0047\n\n## Master Dataset: `irs_master_clean.csv\n| Column             | Description                                   | Units                    | Source                  |\n|--------------------|-----------------------------------------------|--------------------------|-------------------------|\n| income_bracket     | Income range group (ex. $ $10,000 to $15,000) | Text                     | IRS SOI Table 3.2 / 3.3 |\n| num_returns        | Number of tax returns filed in this bracket   | Count                    | IRS SOI Table 3.2 / 3.3 |\n| agi                | Total adjusted gross income for this bracket  | Thousands of dollars     | IRS SOI Table 3.2 / 3.3 |\n| total_income_tax   | Total income tax paid by this bracket         | Thousands of dollars     | IRS SOI Table 3.2 / 3.3 |\n| effective_tax_rate | Effective tax rate = total_income_tax ÷ agi   | Decimal (e.x. 0.05 = 5%) | Computed                |\n| year               | Tax data year                                 | Year (2021, 2022, 2023)  | IRS SOI                 |\n\n\n## Additional notes \n- Money amounts are in thousands of dollars\n- effective_tax_rate is computed, does not come from the IRS files.\n- Under $5,000 includes deficits bracket may show negative agi values (real/expected)\n- Cells marked * or ** in raw files show the unrelaible data  (treated as a NaN)\n- Table 3.2 includes filers by effective tax rate bracket\n- Table 3.3 organizes filers by filing status\n- Each year's data has exactly 12 income brakcet rows \n- Total dataset: 72 rows (12 brackets x 3 years x 2 tables)\n\n\n## Author \n- Laura Romero / Data Engineer / AI4ALL Ignite Team 01B\n
+===================================================================
+diff --git a/data_dictionary.md b/data_dictionary.md
+--- a/data_dictionary.md	(revision dfae7cce7d2e776ce9a2f4f5bdb9b2d753238044)
++++ b/data_dictionary.md	(date 1783722527260)
+@@ -8,7 +8,7 @@
+ - Tax Policy Center, Table T25-0047 for model validation only
+ - Link: https://taxpolicycenter.org/model-estimates/t25-0047
+ 
+-## Master Dataset: `irs_master_clean.csv
++## Master Dataset: irs_master_clean.csv
+ | Column             | Description                                   | Units                    | Source                  |
+ |--------------------|-----------------------------------------------|--------------------------|-------------------------|
+ | income_bracket     | Income range group (ex. $ $10,000 to $15,000) | Text                     | IRS SOI Table 3.2 / 3.3 |
