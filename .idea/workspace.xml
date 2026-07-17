@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3e72400d-995a-495f-bd6d-046737933e4a" name="Changes" comment="handle missing values in `uhrsworkly`, `occ2010`, and `incretir` columns">
+    <list default="true" id="3e72400d-995a-495f-bd6d-046737933e4a" name="Changes" comment="clean CPS data: address missing values, adjust column logic, and refine dataset structure">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/notebooks/cps_data_cleaning.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebooks/cps_data_cleaning.ipynb" afterDir="false" />
     </list>
@@ -14,7 +14,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="20" />
+    <option name="cachedIndexableFilesCount" value="27" />
     <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
   </component>
   <component name="ExportToHTMLSettings">
@@ -54,10 +54,31 @@
     &quot;assignee&quot;: &quot;Lrome1019&quot;
   }
 }</component>
+  <component name="GitHubPullRequestState">{
+  &quot;prStates&quot;: [
+    {
+      &quot;id&quot;: {
+        &quot;id&quot;: &quot;PR_kwDOS8zDEs7yu1y3&quot;,
+        &quot;number&quot;: 2
+      },
+      &quot;lastSeen&quot;: 1784243453998
+    }
+  ]
+}</component>
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/yashkhan42/tax_burden_equity_analyzer.git&quot;,
     &quot;accountId&quot;: &quot;7ce9702c-cef6-4fa9-b7c4-35f500f47fc7&quot;
+  },
+  &quot;recentNewPullRequestHead&quot;: {
+    &quot;server&quot;: {
+      &quot;useHttp&quot;: false,
+      &quot;host&quot;: &quot;github.com&quot;,
+      &quot;port&quot;: null,
+      &quot;suffix&quot;: null
+    },
+    &quot;owner&quot;: &quot;yashkhan42&quot;,
+    &quot;repository&quot;: &quot;tax_burden_equity_analyzer&quot;
   }
 }</component>
   <component name="HighlightingSettingsPerFile">
@@ -69,61 +90,61 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0000140409492588" />
-      <entry key="MS500" value="1.1070235355683071" />
-      <entry key="S2" value="1.5719688006144135" />
-      <entry key="S5" value="1.8158424751575983" />
-      <entry key="S10" value="2.203859038644984" />
-      <entry key="S30" value="4.681390498839204" />
-      <entry key="S60" value="8.764277956571126" />
-      <entry key="M2" value="17.06247351544951" />
-      <entry key="M5" value="38.65428294900691" />
-      <entry key="M10" value="69.96254545610756" />
-      <entry key="M15" value="97.50720301437826" />
-      <entry key="M30" value="168.04957200042676" />
-      <entry key="H1" value="263.90964631596745" />
-      <entry key="H2" value="358.83090059302236" />
-      <entry key="H4" value="433.59219084056724" />
-      <entry key="D1" value="614.7664574969252" />
-      <entry key="W1" value="737.8925873926721" />
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0000000005290048" />
+      <entry key="S2" value="1.004795842515477" />
+      <entry key="S5" value="1.118134175872863" />
+      <entry key="S10" value="1.346531852469306" />
+      <entry key="S30" value="1.8420370355276834" />
+      <entry key="S60" value="2.213281669620209" />
+      <entry key="M2" value="2.549100010199826" />
+      <entry key="M5" value="3.638002865109459" />
+      <entry key="M10" value="7.469552030690187" />
+      <entry key="M15" value="15.834367666872765" />
+      <entry key="M30" value="63.14504775021534" />
+      <entry key="H1" value="170.82305468675716" />
+      <entry key="H2" value="311.9118244415286" />
+      <entry key="H4" value="438.65141771442774" />
+      <entry key="D1" value="690.1060666078772" />
+      <entry key="W1" value="832.0308844263914" />
     </decayedCancelled>
     <decayedSelected>
-      <entry key="MS100" value="1.96305731911817E-235" />
-      <entry key="MS500" value="1.1444230492843204E-47" />
-      <entry key="S2" value="1.8396034125184935E-12" />
-      <entry key="S5" value="2.0871585910798168E-5" />
-      <entry key="S10" value="0.005416444924872172" />
-      <entry key="S30" value="0.33799499002431604" />
-      <entry key="S60" value="1.2198181997804212" />
-      <entry key="M2" value="3.138727234646768" />
-      <entry key="M5" value="8.01749096301849" />
-      <entry key="M10" value="13.521125813231622" />
-      <entry key="M15" value="17.920791698424914" />
-      <entry key="M30" value="28.955577297335605" />
-      <entry key="H1" value="44.63044401640547" />
-      <entry key="H2" value="61.38421816639589" />
-      <entry key="H4" value="74.82257072265716" />
-      <entry key="D1" value="91.28994833419043" />
-      <entry key="W1" value="95.26839758607444" />
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="0.0" />
+      <entry key="S5" value="5.517090931137445E-253" />
+      <entry key="S10" value="8.806263527628382E-127" />
+      <entry key="S30" value="1.8447437386416607E-42" />
+      <entry key="S60" value="2.849758119930448E-21" />
+      <entry key="M2" value="1.5170853735581119E-10" />
+      <entry key="M5" value="5.994335648321467E-4" />
+      <entry key="M10" value="0.11691336027253313" />
+      <entry key="M15" value="0.7549613487689444" />
+      <entry key="M30" value="5.943140413284045" />
+      <entry key="H1" value="20.219624641582097" />
+      <entry key="H2" value="41.31689433528856" />
+      <entry key="H4" value="61.38582483756548" />
+      <entry key="D1" value="88.32741889926409" />
+      <entry key="W1" value="94.82046612727626" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.5494536854534587E-5" />
-      <entry key="MS500" value="0.13872626359794749" />
-      <entry key="S2" value="0.9895534840949493" />
-      <entry key="S5" value="1.5186740210692262" />
-      <entry key="S10" value="2.025063398509878" />
-      <entry key="S30" value="4.871967013497033" />
-      <entry key="S60" value="9.853390144279393" />
-      <entry key="M2" value="20.088882558522283" />
-      <entry key="M5" value="46.572093509211136" />
-      <entry key="M10" value="83.37470335109506" />
-      <entry key="M15" value="115.31579141445944" />
-      <entry key="M30" value="196.90696433346952" />
-      <entry key="H1" value="308.4697736608966" />
-      <entry key="H2" value="420.1711195643437" />
-      <entry key="H4" value="508.3896264106724" />
-      <entry key="D1" value="706.0515514812827" />
-      <entry key="W1" value="833.1602629526169" />
+      <entry key="MS100" value="0.9138314502294005" />
+      <entry key="MS500" value="0.9821395957843907" />
+      <entry key="S2" value="1.000282271756576" />
+      <entry key="S5" value="1.1161535911337321" />
+      <entry key="S10" value="1.3453641044185625" />
+      <entry key="S30" value="1.8414736953793573" />
+      <entry key="S60" value="2.2129121369777356" />
+      <entry key="M2" value="2.5488729393318597" />
+      <entry key="M5" value="3.638467150505595" />
+      <entry key="M10" value="7.585408947980927" />
+      <entry key="M15" value="16.584464877877668" />
+      <entry key="M30" value="69.06784631594711" />
+      <entry key="H1" value="191.0106423690305" />
+      <entry key="H2" value="353.1989762143268" />
+      <entry key="H4" value="500.0165452459612" />
+      <entry key="D1" value="778.4287739917679" />
+      <entry key="W1" value="926.8506297678307" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -135,32 +156,32 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_MARK_IGNORED_FILES_AS_EXCLUDED&quot;: &quot;true&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
-    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
-    &quot;database.data.extractors.current.export.id&quot;: &quot;Python-DataFrame.py.groovy&quot;,
-    &quot;database.data.extractors.current.id&quot;: &quot;Python-DataFrame.py.groovy&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;data-cleaning-cps&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/lrome/Desktop/AI4ALL/TaxBurdenEquityAnalyzer/data/raw&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;org.jetbrains.plugins.github.ui.GithubSettingsConfigurable&quot;,
-    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "database.data.extractors.current.export.id": "Python-DataFrame.py.groovy",
+    "database.data.extractors.current.id": "Python-DataFrame.py.groovy",
+    "git-widget-placeholder": "data-cleaning-cps",
+    "junie.onboarding.icon.badge.shown": "true",
+    "last_opened_file_path": "/Users/lrome/Desktop/AI4ALL/TaxBurdenEquityAnalyzer/data/raw",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "ml.llm.LLMThirdPartyAiProvidersConfigurable",
+    "to.speed.mode.migration.done": "true",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/data/raw" />
@@ -191,7 +212,10 @@
       <workItem from="1783994379310" duration="4320000" />
       <workItem from="1784068458436" duration="34000" />
       <workItem from="1784068558862" duration="1841000" />
-      <workItem from="1784070414948" duration="11029000" />
+      <workItem from="1784070414948" duration="13092000" />
+      <workItem from="1784136241046" duration="4833000" />
+      <workItem from="1784244801261" duration="238000" />
+      <workItem from="1784245099285" duration="5881000" />
     </task>
     <task id="LOCAL-00001" summary="add folder structure, gitignore, and placeholder files">
       <option name="closed" value="true" />
@@ -249,7 +273,15 @@
       <option name="project" value="LOCAL" />
       <updated>1784076734405</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="clean CPS data: address missing values, adjust column logic, and refine dataset structure">
+      <option name="closed" value="true" />
+      <created>1784082756028</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1784082756028</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -287,6 +319,7 @@
     <MESSAGE value="new branch for data cleaning to avoid mix up" />
     <MESSAGE value="add cps data cleaning notebook fix numpy/pyarrow" />
     <MESSAGE value="handle missing values in `uhrsworkly`, `occ2010`, and `incretir` columns" />
-    <option name="LAST_COMMIT_MESSAGE" value="handle missing values in `uhrsworkly`, `occ2010`, and `incretir` columns" />
+    <MESSAGE value="clean CPS data: address missing values, adjust column logic, and refine dataset structure" />
+    <option name="LAST_COMMIT_MESSAGE" value="clean CPS data: address missing values, adjust column logic, and refine dataset structure" />
   </component>
 </project>
