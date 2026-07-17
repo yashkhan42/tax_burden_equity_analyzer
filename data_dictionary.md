@@ -117,16 +117,18 @@ This is the **leakage firewall** required by the spec (README §3.4, §9 Phase 0
 
 Only `feature`-pile columns are used. Raw income components are transformed into **income-composition shares** (the core equity signal); the raw amounts do not enter `X`.
 
+Each share is `component / inctot`, set to **0 when `inctot < 1000`**: below that floor the denominator is too small and shares explode (e.g. `inctot=$50, incint=$500` -> 1000%). This mirrors the AGI floor used elsewhere and prevents nonsense splits / SHAP attributions. Shares can still be negative for genuine business/rent losses (kept, §3.4).
+
 | Feature | Type | Derivation |
 |---|---|---|
 | `inctot` | numeric | Pre-tax total personal income (income level). |
-| `wage_share` | numeric | `incwage / inctot`, 0 when `inctot <= 0`. |
-| `business_share` | numeric | `incbus / inctot`, 0 when `inctot <= 0`. |
-| `interest_share` | numeric | `incint / inctot`, 0 when `inctot <= 0`. |
-| `dividend_share` | numeric | `incdivid / inctot`, 0 when `inctot <= 0`. |
-| `retirement_share` | numeric | `incretir(->0) / inctot`, 0 when `inctot <= 0`. |
-| `socsec_share` | numeric | `incss / inctot`, 0 when `inctot <= 0`. |
-| `rent_share` | numeric | `incrent / inctot`, 0 when `inctot <= 0`. |
+| `wage_share` | numeric | `incwage / inctot`, 0 when `inctot < 1000`. |
+| `business_share` | numeric | `incbus / inctot`, 0 when `inctot < 1000`. |
+| `interest_share` | numeric | `incint / inctot`, 0 when `inctot < 1000`. |
+| `dividend_share` | numeric | `incdivid / inctot`, 0 when `inctot < 1000`. |
+| `retirement_share` | numeric | `incretir(->0) / inctot`, 0 when `inctot < 1000`. |
+| `socsec_share` | numeric | `incss / inctot`, 0 when `inctot < 1000`. |
+| `rent_share` | numeric | `incrent / inctot`, 0 when `inctot < 1000`. |
 | `filestat` | categorical | Filing status (flagged leakage risk, §3.4). |
 | `marst` | categorical | Marital status. |
 | `statefip` | categorical | State FIPS (51 levels) -> one-hot at model time. |
