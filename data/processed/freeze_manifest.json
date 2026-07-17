@@ -1,6 +1,7 @@
 {
   "source": "data/processed/cps_filers_modeling.csv",
   "filer_unit_filter": "depstat == 0",
+  "inctot_share_floor": 1000,
   "random_state": 42,
   "test_size": 0.2,
   "shuffle": true,
@@ -30,8 +31,8 @@
     "test": 12247
   },
   "sha256": {
-    "train.csv": "9cd1b12d19bf7b8059b6585dbd5cbe25946bd72d890e5d4d0dd50077369488ba",
-    "test.csv": "ab3e844cc3070861f0b4fbda8c0ef71a6c2ae083e9cb73d2224681d300ac4a43"
+    "train.csv": "5bdaa4dd6f03e34fd8ecae35a0ed474bc7f6b98a0d4136538cc516040812192c",
+    "test.csv": "30a02cd8fbd11821ae6466a58ec587aeb448a0dc411327833f6ef847901244a5"
   },
   "note": "FROZEN modeling table (README Phase 2). Do not add columns; downstream phases 3-7 read these exact files."
 }
