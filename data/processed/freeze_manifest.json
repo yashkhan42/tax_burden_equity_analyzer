@@ -1,0 +1,38 @@
+{
+  "source": "data/processed/cps_filers_modeling.csv",
+  "filer_unit_filter": "depstat == 0",
+  "inctot_share_floor": 1000,
+  "random_state": 42,
+  "test_size": 0.2,
+  "shuffle": true,
+  "target": "eff_rate",
+  "weight_retained": "asecwt",
+  "feature_cols": [
+    "inctot",
+    "wage_share",
+    "business_share",
+    "interest_share",
+    "dividend_share",
+    "retirement_share",
+    "socsec_share",
+    "rent_share",
+    "age",
+    "nchild",
+    "nchlt5",
+    "famsize",
+    "filestat",
+    "marst",
+    "statefip"
+  ],
+  "n_features": 15,
+  "rows": {
+    "full": 61231,
+    "train": 48984,
+    "test": 12247
+  },
+  "sha256": {
+    "train.csv": "5bdaa4dd6f03e34fd8ecae35a0ed474bc7f6b98a0d4136538cc516040812192c",
+    "test.csv": "30a02cd8fbd11821ae6466a58ec587aeb448a0dc411327833f6ef847901244a5"
+  },
+  "note": "FROZEN modeling table (README Phase 2). Do not add columns; downstream phases 3-7 read these exact files."
+}
