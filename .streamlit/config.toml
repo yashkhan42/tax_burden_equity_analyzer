@@ -1,0 +1,71 @@
+# Theme for the tax burden demo.
+#
+# Two palettes, authored independently — the light one is not the dark one
+# inverted. Dark is the default; the reader switches in the app's own
+# appearance menu (top right, ⋮ → Settings → Appearance), which is why no CSS
+# is injected anywhere in this project.
+#
+# Shared decisions across both modes:
+#   - serif headings, sans body: an editorial register, not a product one
+#   - monospace is reserved for figures that have to line up (see charts.py)
+#   - one accent per mode, spent on the reader's own number and nothing else
+#   - a second hue (clay) exists only to separate "raised" from "lowered" in
+#     the contribution chart, so direction never rests on red/green alone
+
+[theme]
+base = "dark"
+font = "sans serif"
+headingFont = "serif"
+codeFont = "monospace"
+baseRadius = "small"
+showWidgetBorder = true
+
+# --------------------------------------------------------------------------
+# Dark (default)
+#
+# Near-black with a green cast rather than pure #000: pure black against a
+# bright figure causes halation, and the cast ties the surface to the accent.
+# Text is a warm off-white, not #FFF, for the same reason.
+#
+# Contrast against backgroundColor #0E1513:
+#   textColor       #E8E6E1   15.6:1   body text, well past AA
+#   primaryColor    #5FB3A1    7.7:1   the accent; the light mode's deep teal
+#                                      would sit at 1.9:1 here, hence a
+#                                      separate value rather than a shared one
+#   borderColor     #2A3634    1.4:1   structural only, never carries meaning
+# --------------------------------------------------------------------------
+[theme.dark]
+backgroundColor = "#0E1513"
+secondaryBackgroundColor = "#161F1D"
+textColor = "#E9E7E2"
+primaryColor = "#8AD0EA"
+linkColor = "#8AD0EA"
+borderColor = "#2A3634"
+
+# --------------------------------------------------------------------------
+# Light
+#
+# Warm paper rather than white — a research-paper surface, and it keeps the
+# same warm-neutral family as the dark mode's text so the two modes feel
+# related without either being a inversion of the other.
+#
+# Contrast against backgroundColor #FAF8F4:
+#   textColor       #17201E   15.0:1   body text
+#   primaryColor    #2F5D5B    6.7:1   the accent; deep enough to hold against
+#                                      paper, where the dark mode's mint would
+#                                      sit at 2.0:1
+#   borderColor     #DAD5CA    1.3:1   structural only
+# --------------------------------------------------------------------------
+[theme.light]
+backgroundColor = "#FAF8F4"
+secondaryBackgroundColor = "#F0EDE6"
+textColor = "#17201E"
+primaryColor = "#3075A6"
+linkColor = "#3075A6"
+borderColor = "#DAD5CA"
+
+[server]
+headless = true
+
+[browser]
+gatherUsageStats = false

@@ -1,0 +1,65 @@
+{
+  "mode": "dark",
+  "changed": "whether the household counts one earner or two",
+  "a": {
+    "label": "one earner, with the second parent at home full time",
+    "rate": 6.4,
+    "display": "6.4%"
+  },
+  "b": {
+    "label": "two earners splitting the same total between them",
+    "rate": 4.9,
+    "display": "4.9%"
+  },
+  "shared": [
+    {
+      "label": "Income",
+      "value": "$112,000 a year between them, mostly from paychecks with a small amount of interest from savings"
+    },
+    {
+      "label": "Age",
+      "value": "41 and 39"
+    },
+    {
+      "label": "Children at home",
+      "value": "three, aged eleven, eight and four, all of them claimed as dependants"
+    },
+    {
+      "label": "Where they live",
+      "value": "a suburb of a large metropolitan area on the west coast, in a state that levies its own income tax"
+    },
+    {
+      "label": "Health coverage",
+      "value": "bought on the marketplace with an advance premium tax credit"
+    }
+  ],
+  "gapPoints": -1.5,
+  "gapMoney": "About $1,700 a year at this income.",
+  "isPlaceholder": true,
+  "tokens": {
+    "fontSans": "Source Sans Pro, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+    "fontMono": "Source Code Pro, ui-monospace, SFMono-Regular, Menlo, monospace",
+    "fontSerif": "Source Serif Pro, Georgia, serif",
+    "radius": 4,
+    "dark": {
+      "background": "#0E1513",
+      "surface": "#161F1D",
+      "ink": "#E9E7E2",
+      "muted": "#94A09D",
+      "hairline": "#2A3634",
+      "shape": "#3A4A47",
+      "accent": "#8AD0EA",
+      "raised": "#BE7636"
+    },
+    "light": {
+      "background": "#FAF8F4",
+      "surface": "#F0EDE6",
+      "ink": "#17201E",
+      "muted": "#556360",
+      "hairline": "#DAD5CA",
+      "shape": "#C9C2B4",
+      "accent": "#3075A6",
+      "raised": "#6F2E0D"
+    }
+  }
+}
