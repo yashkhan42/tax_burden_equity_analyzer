@@ -40,6 +40,14 @@ The file is currently **person-level** (`pernum`, `cpsidp` identify persons). Th
 
 Start with (A). It is defensible, avoids aggregation ambiguity, and the imputed tax fields already reflect filing-level amounts.
 
+> **AMENDED (Phase 1, implemented).** (A) is the right filter but is **not sufficient on its own**, and the reason is the sentence above: the tax fields are imputed at the *filing* level, while every income column on the row is that one *person's*. For a joint return `adjginc` covers both spouses and `inctot` covers one. Measured: median `adjginc / inctot` was **1.77** for joint filers against **1.00** for single. ~40% of rows were asking the model to predict a rate whose denominator it could not see — which would have charged the missing spouse's income to `filing_status`/`marst` in every SHAP waterfall, and made the twin comparison's single → joint gap mostly "married people often have a second earner" rather than anything the tax code does.
+>
+> Income is therefore **reconstructed to whole-return scope** before any feature is derived:
+> - **Dependents** are present as rows — `depstat` holds the claiming filer's `pernum` within `serial`.
+> - **The spouse is absent from this extract entirely** (one spouse is kept per couple), so their income cannot be read off any row. It is recovered as the family residual `ftotval − sum(inctot of persons present)`. That residual is $0 at the 25th, 50th *and* 75th percentile for families with no joint filer, and ~$50,000 median for families with one — it is the spouse. It is keyed on the **family**, not `spmfamunit`: an SPM unit can span several families and 4,173 do.
+>
+> Result: spread in `adjginc / income` across filing statuses **0.77 → 0.11**, correlation with `adjginc` **0.815 → 0.983**. The feature is `unit_inctot`; `inctot` alone no longer enters `X`. `ftotval` moves from `drop` to `feature` for this reason (it is pre-tax, so it is not leakage — income level is the primary *legitimate* driver of an effective rate, and knowing a ratio's denominator does not reveal the ratio). See `data_dictionary.md` and `freeze_manifest.json`.
+
 ### 3.3 The Target
 
 **Target column:** `eff_rate`, already present in the file.
@@ -74,15 +82,16 @@ Every column is assigned to exactly one pile. Misassignment causes **data leakag
 
 | Feature (derived) | Source column(s) | Notes |
 |---|---|---|
-| Total income | `inctot` | Pre-tax total personal income. Drives bracket placement. **Consider `log1p`** — range is −9,999 to 2.1M, heavily skewed. Note `inctot` can be negative (business/rent losses). |
-| Wage share | `incwage / inctot` | Income composition — **the core equity signal.** |
-| Business share | `incbus / inctot` | Can be negative (losses); guard division when `inctot ≤ 0`. |
-| Interest share | `incint / inctot` | |
-| Dividend share | `incdivid / inctot` | Capital income — taxed preferentially; key to the story. |
-| Retirement share | `incretir / inctot` | `incretir` has some nulls — impute 0. |
-| Social Security share | `incss / inctot` | Partially/untaxed; relevant to age equity. |
-| Rent share | `incrent / inctot` | Can be negative; guard. |
-| Filing status | `filestat` or derived from `marst` | 1=joint, 2=joint/sep, 3=sep, 4=head, 5=single (per this file's `filestat`). |
+| Total income | `unit_inctot` | **AMENDED** — whole-return pre-tax income: `inctot` + dependents' `inctot` + spouse residual (§3.2). Person-level `inctot` alone is the wrong scope and no longer enters `X`. Range is heavily skewed; **consider `log1p`**. Can be negative (business/rent losses). |
+| Wage share | `unit incwage / unit_inctot` | Income composition — **the core equity signal.** |
+| Business share | `unit incbus / unit_inctot` | Can be negative (losses); guard division when the denominator is small. |
+| Interest share | `unit incint / unit_inctot` | |
+| Dividend share | `unit incdivid / unit_inctot` | Capital income — taxed preferentially; key to the story. |
+| Retirement share | `unit incretir / unit_inctot` | `incretir` has some nulls — impute 0. |
+| Social Security share | `unit incss / unit_inctot` | Partially/untaxed; relevant to age equity. |
+| Rent share | `unit incrent / unit_inctot` | Can be negative; guard. |
+| Spouse income share | `spouse residual / unit_inctot` | **AMENDED (new)** — `ftotval` carries no breakdown by source, so the recovered spouse income cannot be split across the seven shares above. It gets its own column, keeping the shares additive and the unobserved portion legible to SHAP. 0 for every non-joint filer, so read its waterfall bar as *"a second earner is on this return"*, not as an income type. |
+| Filing status | `filing_status`, derived from `filestat` | **AMENDED — the gloss below was wrong.** Per the IPUMS codebook shipped at `data/raw/data_dictionary.csv`, `filestat` is `1=Joint both <65`, `2=Joint one 65+`, `3=Joint both 65+`, `4=Head of household`, `5=Single`. Codes **1/2/3 are all joint returns split by age** — not joint/sep/sep — and there is **no married-filing-separately category in this data at all**. The data confirms it: 1/2/3 are 100% `marst`=1 and code 3 has a minimum age of 65. Collapsed to `filing_status` = **1 joint / 4 head_of_household / 5 single**; the age split stays in `age`, which is already a feature. Keeping the raw code would hand the model an age bracket disguised as a filing status and make the §5.2 twin flip incoherent — `5 → 3` would mean *become married **and** become 65+*. |
 | Marital status | `marst` | Structural driver independent of imputed filestat. |
 | Number of children | `nchild` | Drives dependent credits/deductions. |
 | Young children | `nchlt5` | CTC/childcare relevance. |
@@ -104,7 +113,9 @@ Every column is assigned to exactly one pile. Misassignment causes **data leakag
 | Sex | `sex` | **Sensitive — include only if the equity framing explicitly covers it.** |
 
 **DROP — identifiers, weights, and administrative columns (not features, not target):**
-`year`, `serial`, `month`, `cpsid`, `cpsidp`, `cpsidv`, `asecflag`, `pernum`, `ftype`, `spmfamunit`, `spmwt`, `spmftotval`, `ftotval`, `hhincome` (household-level, redundant with filer income and risks leakage of the unit's total).
+`year`, `serial`, `month`, `cpsid`, `cpsidp`, `cpsidv`, `asecflag`, `pernum`, `ftype`, `spmfamunit`, `spmwt`, `spmftotval`, `hhincome` (household-level, redundant with filer income and risks leakage of the unit's total).
+
+> **AMENDED:** `ftotval` was originally in this drop list; it is now a **feature-pile** column — it is the sole recoverable source of the absent spouse's income (§3.2) and enters `X` only via `unit_inctot` and the shares. `serial`, `pernum`, `depstat` remain dropped but serve as structural keys during tax-unit assembly.
 
 **Survey weights — do not use as features, but keep for validation:** `asecwt`, `asecwth`. These are the correct weights for producing population-representative estimates in the §6 validation loop (unweighted CPS means are biased). Pass them to weighted metrics / weighted aggregation, **never** into `X`.
 
@@ -200,7 +211,7 @@ Supporting the UI: the trained model artifact, the validation results against IR
 | Phase | Task | Output | Blocking? |
 |---|---|---|---|
 | 0 | Sort all 59 `cps_filers_clean.csv` columns → target/feature/optional/quarantine/drop/weight/sensitive (§3.4) | `data_dictionary.md` | — |
-| 1 | Filter to filer units (`depstat==0`, §3.2); confirm `eff_rate` target; build income-share features; apply split | clean filer table | — |
+| 1 | Filter to filer units (`depstat==0`, §3.2); confirm `eff_rate` target; **reconstruct tax-unit income (§3.2 amendment)**; build income-share features; apply split | clean filer table | — |
 | 2 | **Freeze modeling table** (80/20, fixed seed) | `train.csv`, `test.csv` | **Yes — blocks all below** |
 | 3 | Train Random Forest; report R², MAE, residuals | model artifact + metrics | after 2 |
 | 4 | SHAP `TreeExplainer`: global summary + per-filer waterfall | SHAP outputs | after 3, parallelizable |
