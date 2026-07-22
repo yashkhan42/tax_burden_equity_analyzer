@@ -1,0 +1,65 @@
+{
+  "mode": "dark",
+  "changed": "where the money comes from",
+  "a": {
+    "label": "mostly a paycheck",
+    "rate": 32.8,
+    "display": "32.8%"
+  },
+  "b": {
+    "label": "mostly investments, with refundable credits",
+    "rate": -48.6,
+    "display": "−48.6%"
+  },
+  "shared": [
+    {
+      "label": "Income",
+      "value": "$29,000 a year"
+    },
+    {
+      "label": "Age",
+      "value": "61"
+    },
+    {
+      "label": "Children at home",
+      "value": "two"
+    },
+    {
+      "label": "Where they live",
+      "value": "a rural county in the Mountain West"
+    },
+    {
+      "label": "Health coverage",
+      "value": "bought on the marketplace"
+    }
+  ],
+  "gapPoints": -81.4,
+  "gapMoney": "About $24,000 a year at this income.",
+  "isPlaceholder": true,
+  "tokens": {
+    "fontSans": "Source Sans Pro, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+    "fontMono": "Source Code Pro, ui-monospace, SFMono-Regular, Menlo, monospace",
+    "fontSerif": "Source Serif Pro, Georgia, serif",
+    "radius": 4,
+    "dark": {
+      "background": "#0E1513",
+      "surface": "#161F1D",
+      "ink": "#E9E7E2",
+      "muted": "#94A09D",
+      "hairline": "#2A3634",
+      "shape": "#3A4A47",
+      "accent": "#8AD0EA",
+      "raised": "#BE7636"
+    },
+    "light": {
+      "background": "#FAF8F4",
+      "surface": "#F0EDE6",
+      "ink": "#17201E",
+      "muted": "#556360",
+      "hairline": "#DAD5CA",
+      "shape": "#C9C2B4",
+      "accent": "#3075A6",
+      "raised": "#6F2E0D"
+    }
+  }
+}

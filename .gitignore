@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.DS_Store
+
+# Component sources build to components/*/build, and those builds ARE
+# committed: Streamlit Community Cloud installs Python requirements only and
+# never runs npm, so an uncommitted build means a blank page on deploy.
+node_modules/
+components/*/.vite/
