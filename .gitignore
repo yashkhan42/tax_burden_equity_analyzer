@@ -7,6 +7,14 @@ __pycache__/
 .venv/
 
 # Jupyter
+# macOS junk
+.DS_Store
+
+# Trained model artifacts — large binaries, rebuilt from the recipe:
+# notebooks/train_random_forest.ipynb + frozen train.csv + models/rf_metrics.json
+models/*.joblib
+
+# Jupyter checkpoints
 .ipynb_checkpoints/
 
 # IDE

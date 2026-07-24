@@ -1,0 +1,60 @@
+variable,label,value_codes
+year,Survey year,(continuous / numeric)
+serial,Household serial number,(continuous / numeric)
+month,Month,1=January | 2=February | 3=March | 4=April | 5=May | 6=June | 7=July | 8=August | 9=September | 10=October | 11=November | 12=December
+cpsid,"CPSID, household record",(continuous / numeric)
+asecflag,Flag for ASEC,1=ASEC | 2=March Basic
+asecwth,Annual Social and Economic Supplement Household weight,(continuous / numeric)
+statefip,State (FIPS code),(75 coded values — see DDI)
+hhincome,Total household income,(continuous / numeric)
+pernum,Person number in sample unit,(continuous / numeric)
+cpsidp,"CPSID, person record",(continuous / numeric)
+cpsidv,Validated Longitudinal Identifier,(continuous / numeric)
+asecwt,Annual Social and Economic Supplement Weight,(continuous / numeric)
+age,Age,(100 coded values — see DDI)
+sex,Sex,1=Male | 2=Female | 9=NIU
+race,Race,"100=White | 200=Black | 300=American Indian/Aleut/Eskimo | 650=Asian or Pacific Islander | 651=Asian only | 652=Hawaiian/Pacific Islander only | 700=Other (single) race, n.e.c. | 801=White-Black | 802=White-American Indian | 803=White-Asian | 804=White-Hawaiian/Pacific Islander | 805=Black-American Indian | 806=Black-Asian | 807=Black-Hawaiian/Pacific Islander | 808=American Indian-Asian | 809=Asian-Hawaiian/Pacific Islander | 810=White-Black-American Indian | 811=White-Black-Asian | 812=White-American Indian-Asian | 813=White-Asian-Hawaiian/Pacific Islander | 814=White-Black-American Indian-Asian | 815=American Indian-Hawaiian/Pacific Islander | 816=White-Black--Hawaiian/Pacific Islander | 817=White-American Indian-Hawaiian/Pacific Islander | 818=Black-American Indian-Asian | 819=White-American Indian-Asian-Hawaiian/Pacific Islander | 820=Two or three races, unspecified | 830=Four or five races, unspecified | 999=Blank"
+marst,Marital status,"1=Married, spouse present | 2=Married, spouse absent | 3=Separated | 4=Divorced | 5=Widowed | 6=Never married/single | 7=Widowed or Divorced | 9=NIU"
+vetstat,Veteran status,0=NIU | 1=No service | 2=Yes | 9=Unknown
+famsize,Number of own family members in hh,0=Missing | 1=1 family member present | 2=2 family members present | 3=3 family members present | 4=4 family members present | 5=5 family members present | 6=6 family members present | 7=7 family members present | 8=8 family members present | 9=9 family members present | 10=10 family members present | 11=11 family members present | 12=12 family members present | 13=13 family members present | 14=14 family members present | 15=15 family members present | 16=16 family members present | 17=17 family members present | 18=18 family members present | 19=19 family members present | 20=20 family members present | 21=21 family members present | 22=22 family members present | 23=23 family members present | 24=24 family members present | 25=25 family members present | 26=26 family members present | 27=27 family members present | 28=28 family members present | 29=29 family members present
+nchild,Number of own children in household,0=0 children present | 1=1 child present | 2=2 | 3=3 | 4=4 | 5=5 | 6=6 | 7=7 | 8=8 | 9=9+
+nchlt5,Number of own children under age 5 in hh,0=No children under age 5 | 1=1 child under age 5 | 2=2 | 3=3 | 4=4 | 5=5 | 6=6 | 7=7 | 8=8 | 9=9+
+ftype,Family Type,1=Primary family | 2=Nonfamily householder | 3=Related subfamily | 4=Unrelated subfamily | 5=Secondary individual | 9=Missing
+yrimmig,Year of immigration,(63 coded values — see DDI)
+citizen,Citizenship status,1=Born in U.S | 2=Born in U.S. outlying | 3=Born abroad of American parents | 4=Naturalized citizen | 5=Not a citizen | 9=NIU
+nativity,Foreign birthplace or parentage,"0=Unknown | 1=Both parents native-born | 2=Father foreign, mother native | 3=Mother foreign, father native | 4=Both parents foreign | 5=Foreign born"
+hispan,Hispanic origin,"0=Not Hispanic | 100=Mexican | 102=Mexican American | 103=Mexicano/Mexicana | 104=Chicano/Chicana | 108=Mexican (Mexicano) | 109=Mexicano/Chicano | 200=Puerto Rican | 300=Cuban | 400=Dominican | 500=Salvadoran | 600=Other Hispanic | 610=Central/South American | 611=Central American, (excluding Salvadoran) | 612=South American | 901=Do not know | 902=N/A (and no response 1985-87)"
+empstat,Employment status,"0=NIU | 1=Armed Forces | 10=At work | 12=Has job, not at work last week | 20=Unemployed | 21=Unemployed, experienced worker | 22=Unemployed, new worker | 30=Not in labor force | 31=NILF, housework | 32=NILF, unable to work | 33=NILF, school | 34=NILF, other | 35=NILF, unpaid, lt 15 hours | 36=NILF, retired"
+occ2010,"Occupation, 2010 basis",(479 coded values — see DDI)
+ind,Industry,(continuous / numeric)
+classwkr,Class of worker ,"0=NIU | 10=Self-employed | 13=Self-employed, not incorporated | 14=Self-employed, incorporated | 20=Works for wages or salary | 21=Wage/salary, private | 22=Private, for profit | 23=Private, nonprofit | 24=Wage/salary, government | 25=Federal government employee | 26=Armed forces | 27=State government employee | 28=Local government employee | 29=Unpaid family worker | 99=Missing/Unknown"
+educ,Educational attainment recode,"0=NIU or no schooling | 1=NIU or blank | 2=None or preschool | 10=Grades 1, 2, 3, or 4 | 11=Grade 1 | 12=Grade 2 | 13=Grade 3 | 14=Grade 4 | 20=Grades 5 or 6 | 21=Grade 5 | 22=Grade 6 | 30=Grades 7 or 8 | 31=Grade 7 | 32=Grade 8 | 40=Grade 9 | 50=Grade 10 | 60=Grade 11 | 70=Grade 12 | 71=12th grade, no diploma | 72=12th grade, diploma unclear | 73=High school diploma or equivalent | 80=1 year of college | 81=Some college but no degree | 90=2 years of college | 91=Associate's degree, occupational/vocational program | 92=Associate's degree, academic program | 100=3 years of college | 110=4 years of college | 111=Bachelor's degree | 120=5+ years of college | 121=5 years of college | 122=6+ years of college | 123=Master's degree | 124=Professional school degree | 125=Doctorate degree | 999=Missing/Unknown"
+diffany,Any difficulty,0=NIU | 1=No difficulty | 2=Has difficulty
+wkswork1,Weeks worked last year,(continuous / numeric)
+uhrsworkly,Usual hours worked per week (last yr),(continuous / numeric)
+pension,Pension plan at work,"0=NIU | 1=No pension plan at work | 2=Pension plan at work, but not included | 3=Included in pension plan at work"
+firmsize,Number of employees,0=NIU | 1=Under 10 | 2=10 to 24 | 3=Under 25 | 4=10 to 49 | 5=25 to 99 | 6=50 to 99 | 7=100 to 499 | 8=500 to 999 | 9=1000+
+ftotval,Total family income,(continuous / numeric)
+inctot,Total personal income,(continuous / numeric)
+incwage,Wage and salary income,(continuous / numeric)
+incbus,Non-farm business income,(continuous / numeric)
+incss,Social Security income,(continuous / numeric)
+incretir,Retirement income,(continuous / numeric)
+incint,Income from interest,(continuous / numeric)
+incdivid,Income from dividends,(continuous / numeric)
+incrent,Income from rent,(continuous / numeric)
+ctccrd,Child Tax Credit,(continuous / numeric)
+actccrd,Additional Child Tax Credit,(continuous / numeric)
+adjginc,Adjusted gross income,(continuous / numeric)
+eitcred,Earned income tax credit,(continuous / numeric)
+fedtaxac,"Federal income tax liability, after all credits",(continuous / numeric)
+fica,Social security retirement payroll deduction,(continuous / numeric)
+filestat,Tax filer status,"0=No data | 1=Joint, both less than 65 | 2=Joint, one less than 65, one 65+ | 3=Joint, both 65+ | 4=Head of household | 5=Single | 6=Nonfiler"
+depstat,Dependency status pointer,(continuous / numeric)
+margtax,Federal income marginal tax rate,(continuous / numeric)
+taxinc,Taxable income amount,(continuous / numeric)
+spmwt,SPM unit's weight,(continuous / numeric)
+spmfedtaxac,SPM unit's federal tax,(continuous / numeric)
+spmftotval,SPM unit's cash income,(continuous / numeric)
+spmfamunit,SPM unit's ID,(continuous / numeric)
+eff_rate,Effective federal tax rate (DERIVED = fedtaxac/adjginc*100),"(continuous, percent)"
