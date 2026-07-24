@@ -1,0 +1,360 @@
+{
+  "phase": 3,
+  "spec": "README \u00a74 (model, metrics, faithfulness), \u00a79 Phase 3",
+  "inputs": {
+    "train.csv_sha256": "3f56170b3514db95027c084a1b4807a94d466f91a48681d8d148e8c3ef8bd6db",
+    "test.csv_sha256": "286577a80698787dc6fd868152bc85c917958c2c770e683f6913f69f9eb3e55f",
+    "feature_cols": [
+      "unit_inctot",
+      "wage_share",
+      "business_share",
+      "interest_share",
+      "dividend_share",
+      "retirement_share",
+      "socsec_share",
+      "rent_share",
+      "spouse_income_share",
+      "age",
+      "nchild",
+      "nchlt5",
+      "famsize",
+      "filing_status",
+      "marst",
+      "statefip"
+    ],
+    "target": "eff_rate",
+    "target_scale": "percent (eff_rate = 100 * fedtaxac / adjginc)"
+  },
+  "encoding": {
+    "choice": "one-hot for filing_status, marst, statefip (documented per \u00a74.1); no target-derived transform",
+    "categorical": [
+      "filing_status",
+      "marst",
+      "statefip"
+    ],
+    "n_encoded_columns": 73,
+    "categories": {
+      "filing_status": [
+        1,
+        4,
+        5
+      ],
+      "marst": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "statefip": [
+        1,
+        2,
+        4,
+        5,
+        6,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        53,
+        54,
+        55,
+        56
+      ]
+    }
+  },
+  "search": {
+    "protocol": "GridSearchCV, KFold(3, shuffle=True, random_state=42), train.csv only, scoring=neg_mean_absolute_error, n_estimators=200 during search",
+    "grid": {
+      "max_depth": [
+        "None",
+        "16"
+      ],
+      "min_samples_leaf": [
+        "2",
+        "5",
+        "20"
+      ],
+      "max_features": [
+        "sqrt",
+        "0.5"
+      ]
+    },
+    "results": [
+      {
+        "param_rf__max_depth": null,
+        "param_rf__min_samples_leaf": 2,
+        "param_rf__max_features": 0.5,
+        "cv_MAE": 1.3192961355,
+        "std_test_score": 0.0030753596,
+        "train_MAE": 0.7142232956,
+        "rank_test_score": 1
+      },
+      {
+        "param_rf__max_depth": 16,
+        "param_rf__min_samples_leaf": 2,
+        "param_rf__max_features": 0.5,
+        "cv_MAE": 1.3274800575,
+        "std_test_score": 0.0032376895,
+        "train_MAE": 0.8243872536,
+        "rank_test_score": 2
+      },
+      {
+        "param_rf__max_depth": null,
+        "param_rf__min_samples_leaf": 5,
+        "param_rf__max_features": 0.5,
+        "cv_MAE": 1.3550923107,
+        "std_test_score": 0.0028533,
+        "train_MAE": 1.0197692429,
+        "rank_test_score": 3
+      },
+      {
+        "param_rf__max_depth": 16,
+        "param_rf__min_samples_leaf": 5,
+        "param_rf__max_features": 0.5,
+        "cv_MAE": 1.3578325486,
+        "std_test_score": 0.0030743778,
+        "train_MAE": 1.0453337996,
+        "rank_test_score": 4
+      },
+      {
+        "param_rf__max_depth": null,
+        "param_rf__min_samples_leaf": 20,
+        "param_rf__max_features": 0.5,
+        "cv_MAE": 1.4880647132,
+        "std_test_score": 0.0051508101,
+        "train_MAE": 1.3648292334,
+        "rank_test_score": 5
+      },
+      {
+        "param_rf__max_depth": 16,
+        "param_rf__min_samples_leaf": 20,
+        "param_rf__max_features": 0.5,
+        "cv_MAE": 1.4917478191,
+        "std_test_score": 0.0023444157,
+        "train_MAE": 1.3677328913,
+        "rank_test_score": 6
+      },
+      {
+        "param_rf__max_depth": null,
+        "param_rf__min_samples_leaf": 2,
+        "param_rf__max_features": "sqrt",
+        "cv_MAE": 1.9964327451,
+        "std_test_score": 0.0228461168,
+        "train_MAE": 1.5115131878,
+        "rank_test_score": 7
+      },
+      {
+        "param_rf__max_depth": null,
+        "param_rf__min_samples_leaf": 5,
+        "param_rf__max_features": "sqrt",
+        "cv_MAE": 2.303186635,
+        "std_test_score": 0.0533275647,
+        "train_MAE": 2.0919607399,
+        "rank_test_score": 8
+      },
+      {
+        "param_rf__max_depth": 16,
+        "param_rf__min_samples_leaf": 2,
+        "param_rf__max_features": "sqrt",
+        "cv_MAE": 2.4365085999,
+        "std_test_score": 0.0399851847,
+        "train_MAE": 2.1438268456,
+        "rank_test_score": 9
+      },
+      {
+        "param_rf__max_depth": 16,
+        "param_rf__min_samples_leaf": 5,
+        "param_rf__max_features": "sqrt",
+        "cv_MAE": 2.5604928174,
+        "std_test_score": 0.0288414855,
+        "train_MAE": 2.3954257948,
+        "rank_test_score": 10
+      },
+      {
+        "param_rf__max_depth": null,
+        "param_rf__min_samples_leaf": 20,
+        "param_rf__max_features": "sqrt",
+        "cv_MAE": 2.8715006108,
+        "std_test_score": 0.0299594602,
+        "train_MAE": 2.7968890789,
+        "rank_test_score": 11
+      },
+      {
+        "param_rf__max_depth": 16,
+        "param_rf__min_samples_leaf": 20,
+        "param_rf__max_features": "sqrt",
+        "cv_MAE": 2.9613836798,
+        "std_test_score": 0.0046286117,
+        "train_MAE": 2.8929394171,
+        "rank_test_score": 12
+      }
+    ],
+    "selected": {
+      "max_depth": "None",
+      "max_features": "0.5",
+      "min_samples_leaf": "2"
+    },
+    "cv_mae_selected": 1.3193
+  },
+  "final_model": {
+    "class": "sklearn.ensemble.RandomForestRegressor",
+    "sklearn_version": "1.7.2",
+    "hyperparameters": {
+      "bootstrap": true,
+      "ccp_alpha": 0.0,
+      "criterion": "squared_error",
+      "max_depth": null,
+      "max_features": 0.5,
+      "max_leaf_nodes": null,
+      "max_samples": null,
+      "min_impurity_decrease": 0.0,
+      "min_samples_leaf": 2,
+      "min_samples_split": 2,
+      "min_weight_fraction_leaf": 0.0,
+      "monotonic_cst": null,
+      "n_estimators": 500,
+      "n_jobs": -1,
+      "oob_score": true,
+      "random_state": 42,
+      "verbose": 0,
+      "warm_start": false
+    },
+    "fit_seconds": 26.4,
+    "artifact": "models/rf_eff_rate.joblib",
+    "artifact_sha256": "7b78751aecad6c3b0c3f794d91e17d2f41839e338ef9de39a17572d2dc4d0b90",
+    "artifact_mb": 275.7
+  },
+  "metrics": {
+    "train": {
+      "R2": 0.9703,
+      "MAE": 0.6971
+    },
+    "oob": {
+      "R2": 0.9086
+    },
+    "test": {
+      "R2": 0.9005,
+      "MAE": 1.277
+    },
+    "test_weighted_asecwt": {
+      "R2": 0.9023,
+      "MAE": 1.1928
+    }
+  },
+  "residual_bias_by_income_decile": {
+    "0": {
+      "mean": 0.1511,
+      "median": -0.0001,
+      "inc_lo": 1.0,
+      "inc_hi": 22000.0,
+      "n": 1245
+    },
+    "1": {
+      "mean": 0.0187,
+      "median": 0.0094,
+      "inc_lo": 22001.0,
+      "inc_hi": 32075.0,
+      "n": 1205
+    },
+    "2": {
+      "mean": -0.1118,
+      "median": 0.0211,
+      "inc_lo": 32100.0,
+      "inc_hi": 43000.0,
+      "n": 1238
+    },
+    "3": {
+      "mean": 0.2284,
+      "median": 0.0542,
+      "inc_lo": 43001.0,
+      "inc_hi": 53097.0,
+      "n": 1211
+    },
+    "4": {
+      "mean": -0.0399,
+      "median": 0.1098,
+      "inc_lo": 53098.0,
+      "inc_hi": 67520.0,
+      "n": 1225
+    },
+    "5": {
+      "mean": -0.1873,
+      "median": 0.2072,
+      "inc_lo": 67550.0,
+      "inc_hi": 85699.0,
+      "n": 1224
+    },
+    "6": {
+      "mean": 0.0109,
+      "median": 0.2725,
+      "inc_lo": 85710.0,
+      "inc_hi": 110062.0,
+      "n": 1225
+    },
+    "7": {
+      "mean": 0.0113,
+      "median": 0.2542,
+      "inc_lo": 110071.0,
+      "inc_hi": 148420.0,
+      "n": 1225
+    },
+    "8": {
+      "mean": -0.1249,
+      "median": 0.2669,
+      "inc_lo": 148485.0,
+      "inc_hi": 213700.0,
+      "n": 1224
+    },
+    "9": {
+      "mean": -0.0751,
+      "median": 0.5065,
+      "inc_lo": 213760.0,
+      "inc_hi": 1672866.0,
+      "n": 1225
+    }
+  },
+  "caveats": [
+    "Row-random (not group-aware) frozen split: related filers can straddle train/test; test R\u00b2 may be mildly optimistic. CV folds inherit the same property.",
+    "Weighted metrics use asecwt on the test split only; weights never entered X (\u00a73.4)."
+  ]
+}
