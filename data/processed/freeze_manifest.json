@@ -1,0 +1,87 @@
+{
+  "source": "data/processed/cps_filers_modeling.csv",
+  "filer_unit_filter": "depstat == 0",
+  "unit_reconstruction": {
+    "why": "eff_rate is scoped to the tax RETURN (fedtaxac/adjginc are imputed at the filing level) but every income column is person-level. Median adjginc/inctot was 1.77 for joint filers vs 1.00 for single.",
+    "unit_income": "inctot + dependents' inctot + spouse residual",
+    "dependents_via": "depstat pointer -> filer pernum within serial",
+    "spouse_via": "family residual: ftotval - sum(inctot of persons present), clipped at 0",
+    "family_key": [
+      "serial",
+      "ftotval"
+    ],
+    "joint_filestat_codes": [
+      1,
+      2,
+      3
+    ],
+    "scope_check_median_adjginc_ratio": {
+      "before_by_filestat": {
+        "1": 1.77,
+        "2": 1.576,
+        "3": 1.278,
+        "4": 1.0,
+        "5": 1.0
+      },
+      "after_by_filestat": {
+        "1": 1.0,
+        "2": 0.966,
+        "3": 0.882,
+        "4": 1.0,
+        "5": 1.0
+      }
+    },
+    "corr_with_adjginc": {
+      "before": 0.8154,
+      "after": 0.9817
+    }
+  },
+  "filing_status_map": {
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 4,
+    "5": 5
+  },
+  "filing_status_labels": {
+    "1": "joint",
+    "4": "head_of_household",
+    "5": "single"
+  },
+  "share_floor": 1000,
+  "share_basis": "unit_inctot",
+  "random_state": 42,
+  "test_size": 0.2,
+  "shuffle": true,
+  "target": "eff_rate",
+  "weight_retained": "asecwt",
+  "feature_cols": [
+    "unit_inctot",
+    "wage_share",
+    "business_share",
+    "interest_share",
+    "dividend_share",
+    "retirement_share",
+    "socsec_share",
+    "rent_share",
+    "spouse_income_share",
+    "age",
+    "nchild",
+    "nchlt5",
+    "famsize",
+    "filing_status",
+    "marst",
+    "statefip"
+  ],
+  "n_features": 16,
+  "rows": {
+    "full": 61231,
+    "train": 48984,
+    "test": 12247
+  },
+  "sha256": {
+    "train.csv": "3f56170b3514db95027c084a1b4807a94d466f91a48681d8d148e8c3ef8bd6db",
+    "test.csv": "286577a80698787dc6fd868152bc85c917958c2c770e683f6913f69f9eb3e55f"
+  },
+  "note": "FROZEN modeling table (README Phase 2). Do not add columns; downstream phases 3-7 read these exact files."
+}
