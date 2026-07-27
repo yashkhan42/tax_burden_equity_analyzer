@@ -24,6 +24,8 @@ and pre-rounded numbers. The components render what they are given; they never
 decide what a number means or how many decimals it deserves.
 """
 
+import threading
+
 import streamlit as st
 
 import charts
@@ -54,6 +56,28 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed",
 )
+
+
+@st.cache_resource(show_spinner=False)
+def _warm_the_predictor() -> None:
+    """Start fetching the trained predictor while the reader reads.
+
+    On a host that installs requirements and runs this file, the predictor is
+    not on disk when the page first opens. Fetching it takes about twenty
+    seconds. Doing that on the reader's first question would answer a lever
+    they just pulled with a long silence; doing it here, in the background,
+    spends that time while they are still reading and filling in the form.
+
+    The thread only puts a file in place -- it draws nothing and decides
+    nothing -- so this stays a page that asks the model boundary for numbers
+    and never touches a model itself. If it fails, or has not finished when the
+    reader asks, the ordinary path simply waits or shows the ordinary
+    unavailable notice; nothing here changes what a reader sees.
+    """
+    threading.Thread(target=mi.prepare_artifact, daemon=True).start()
+
+
+_warm_the_predictor()
 
 # ---------------------------------------------------------------------------
 # Constants that are design decisions, not incidentals

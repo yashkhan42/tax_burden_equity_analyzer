@@ -164,3 +164,133 @@ def test_absent_model_is_a_lazy_domain_error(monkeypatch, tmp_path) -> None:
     with pytest.raises(mi.ModelArtifactUnavailable, match="No trained artifact"):
         mi._load_model()
     mi._load_model.cache_clear()
+
+
+class _StubForest:
+    """Stands in for the fitted pipeline so these stay artifact-free."""
+
+    def __init__(self, predictions: np.ndarray) -> None:
+        self._predictions = predictions
+
+    def predict(self, frame):  # noqa: ANN001 - mirrors the sklearn signature
+        assert list(frame.columns) == list(mi.FEATURE_COLS)
+        return self._predictions
+
+
+def _frozen_test_targets() -> np.ndarray:
+    import pandas as pd
+
+    return np.asarray(
+        pd.read_csv(mi.TEST_PATH)[mi._manifest()["target"]], dtype=float
+    )
+
+
+def test_rebuilt_artifact_is_admitted_when_it_reproduces_logged_metrics() -> None:
+    """A locally rebuilt artifact has different bytes but identical behaviour."""
+    observed = _frozen_test_targets()
+    scored = mi._verify_rebuilt_artifact(
+        _StubForest(observed), {"metrics": {"test": {"R2": 1.0, "MAE": 0.0}}}
+    )
+    assert scored["R2"] == pytest.approx(1.0)
+    assert scored["MAE"] == pytest.approx(0.0, abs=1e-12)
+
+
+def test_artifact_that_misses_the_logged_metrics_is_rejected() -> None:
+    """Different bytes are tolerated; a different *model* is not."""
+    observed = _frozen_test_targets()
+    with pytest.raises(mi.ModelContractError, match="not the model its metadata describes"):
+        mi._verify_rebuilt_artifact(
+            _StubForest(observed), {"metrics": {"test": {"R2": 0.9005, "MAE": 1.277}}}
+        )
+
+
+def test_rebuilt_artifact_check_requires_logged_metrics() -> None:
+    observed = _frozen_test_targets()
+    with pytest.raises(mi.ModelContractError, match="no logged test"):
+        mi._verify_rebuilt_artifact(_StubForest(observed), {"metrics": {"test": {}}})
+
+
+def test_non_finite_predictions_are_rejected() -> None:
+    observed = _frozen_test_targets()
+    broken = observed.copy()
+    broken[0] = np.nan
+    with pytest.raises(mi.ModelContractError, match="non-finite"):
+        mi._verify_rebuilt_artifact(
+            _StubForest(broken), {"metrics": {"test": {"R2": 1.0, "MAE": 0.0}}}
+        )
+
+
+# ---------------------------------------------------------------------------
+# Canonical-artifact fetch (what makes a fresh cloud deploy work)
+# ---------------------------------------------------------------------------
+
+
+def test_fetch_is_skipped_when_disabled(monkeypatch, tmp_path) -> None:
+    """conftest disables fetching, so a missing artifact must not hit the network."""
+    import backend.artifacts as artifacts
+
+    def _explode(**_kwargs):
+        raise AssertionError("download must not be attempted when fetching is disabled")
+
+    monkeypatch.setattr(artifacts, "download_artifact", _explode)
+    monkeypatch.setenv(mi.MODEL_PATH_ENV, str(tmp_path / "absent.joblib"))
+    mi._load_model.cache_clear()
+    with pytest.raises(mi.ModelArtifactUnavailable, match="No trained artifact"):
+        mi._load_model()
+    mi._load_model.cache_clear()
+
+
+def test_missing_artifact_is_fetched_from_the_recorded_url(monkeypatch, tmp_path) -> None:
+    import backend.artifacts as artifacts
+
+    destination = tmp_path / "fetched.joblib"
+    calls: dict[str, object] = {}
+
+    def _record(*, url, destination, metadata_path, token=None):  # noqa: ANN001
+        calls.update(url=url, destination=destination, token=token)
+        destination.write_bytes(b"not a real forest")
+
+    monkeypatch.setattr(artifacts, "download_artifact", _record)
+    monkeypatch.setenv(mi.ARTIFACT_FETCH_ENV, "1")
+    monkeypatch.delenv("TAX_MODEL_DOWNLOAD_URL", raising=False)
+    monkeypatch.setenv(mi.MODEL_PATH_ENV, str(destination))
+    mi._load_model.cache_clear()
+
+    # The stub writes bytes that are not a pipeline, so loading still fails --
+    # what matters is that the fetch was attempted against the recorded release.
+    with pytest.raises(mi.ModelInterfaceError):
+        mi._load_model()
+    mi._load_model.cache_clear()
+
+    assert "releases/download" in str(calls["url"])
+    assert calls["destination"] == destination
+
+
+def test_a_failed_fetch_degrades_instead_of_crashing(monkeypatch, tmp_path) -> None:
+    """A download problem must reach the reader as the normal unavailable state."""
+    import backend.artifacts as artifacts
+
+    def _fail(**_kwargs):
+        raise artifacts.ArtifactBootstrapError("release is unreachable")
+
+    monkeypatch.setattr(artifacts, "download_artifact", _fail)
+    monkeypatch.setenv(mi.ARTIFACT_FETCH_ENV, "1")
+    monkeypatch.setenv(mi.MODEL_PATH_ENV, str(tmp_path / "absent.joblib"))
+    mi._load_model.cache_clear()
+
+    with pytest.warns(RuntimeWarning, match="could not be fetched"):
+        with pytest.raises(mi.ModelArtifactUnavailable, match="could not be fetched"):
+            mi._load_model()
+    mi._load_model.cache_clear()
+
+
+def test_download_url_falls_back_to_committed_metadata(monkeypatch) -> None:
+    """A host with no configuration still finds the canonical release."""
+    from backend.artifacts import configured_download_url
+
+    monkeypatch.setenv("TAX_MODEL_DOWNLOAD_URL", "https://example.test/override.joblib")
+    assert configured_download_url() == "https://example.test/override.joblib"
+
+    monkeypatch.delenv("TAX_MODEL_DOWNLOAD_URL", raising=False)
+    url = configured_download_url()
+    assert url is not None and "releases/download" in url

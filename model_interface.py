@@ -18,6 +18,7 @@ import hashlib
 import json
 import math
 import os
+import warnings
 from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
@@ -37,6 +38,7 @@ ROOT = Path(__file__).resolve().parent
 PROCESSED_DIR = ROOT / "data" / "processed"
 MANIFEST_PATH = PROCESSED_DIR / "freeze_manifest.json"
 TRAIN_PATH = PROCESSED_DIR / "train.csv"
+TEST_PATH = PROCESSED_DIR / "test.csv"
 DEFAULT_MODEL_PATH = ROOT / "models" / "rf_eff_rate.joblib"
 DEFAULT_METRICS_PATH = ROOT / "models" / "rf_metrics.json"
 
@@ -376,27 +378,159 @@ def _validate_model(model: Any, metrics: dict[str, Any]) -> None:
         raise ModelContractError("The forest and encoder disagree on feature count.")
 
 
+METRIC_TOLERANCE = 1e-3
+
+# Hosts that install requirements and run the app, with no build step and no
+# writable image to bake a 263 MB file into -- Streamlit Community Cloud is the
+# one this project deploys to -- have nowhere to put the artifact ahead of time.
+# Fetching it on first use is the only way such a host can serve real numbers.
+ARTIFACT_FETCH_ENV = "TAX_MODEL_FETCH"
+
+
+def _artifact_fetch_enabled() -> bool:
+    """Fetching is on by default; ``TAX_MODEL_FETCH=0`` turns it off.
+
+    An air-gapped or offline deployment can disable the network entirely and
+    still get the honest "no artifact" degraded state rather than a stall.
+    """
+    return os.environ.get(ARTIFACT_FETCH_ENV, "1").strip().lower() not in {"0", "false", "no"}
+
+
+# Streamlit serves every browser session from one process, so two readers
+# arriving at a cold app would otherwise start two downloads writing the same
+# sibling ".part" file and race to promote it. One at a time; whoever loses the
+# race finds the file already there and returns.
+_FETCH_LOCK = __import__("threading").Lock()
+
+
+def prepare_artifact() -> bool:
+    """Ensure the trained artifact is on disk, fetching it if needed.
+
+    Safe and cheap to call repeatedly, and safe to call from a background
+    thread: it performs no rendering and raises nothing. Returns whether an
+    artifact is present afterwards, so a caller may warm the file while the
+    reader is still filling in the form instead of making them wait after they
+    ask a question.
+    """
+    path = _configured_path(MODEL_PATH_ENV, DEFAULT_MODEL_PATH)
+    if path.is_file():
+        return True
+    _fetch_canonical_artifact(path)
+    return path.is_file()
+
+
+def _fetch_canonical_artifact(destination: Path) -> None:
+    """Best-effort download of the canonical artifact when none is on disk.
+
+    Deliberately quiet about failure: the caller raises
+    :class:`ModelArtifactUnavailable` when the file is still missing, and the
+    page already renders a reader-facing degraded state for exactly that. A
+    download problem must not surface as a stack trace on someone's screen.
+
+    ``backend.artifacts`` is imported lazily so that importing this module stays
+    free of any dependency on the HTTP layer, and so an import failure here is
+    just one more reason the artifact is unavailable.
+    """
+    if not _artifact_fetch_enabled():
+        return
+    try:
+        from backend.artifacts import (
+            configured_download_url,
+            download_artifact,
+            download_token,
+        )
+
+        metadata_path = _configured_path(MODEL_METRICS_PATH_ENV, DEFAULT_METRICS_PATH)
+        url = configured_download_url(metadata_path)
+        if not url:
+            return
+        with _FETCH_LOCK:
+            if destination.is_file():
+                return  # another session won the race and already promoted it
+            download_artifact(
+                url=url,
+                destination=destination,
+                metadata_path=metadata_path,
+                token=download_token(),
+            )
+    except Exception as error:  # noqa: BLE001 - degrade, never crash the page
+        warnings.warn(
+            f"The canonical model artifact could not be fetched: {error}",
+            RuntimeWarning,
+            stacklevel=2,
+        )
+
+
+def _verify_rebuilt_artifact(model: Any, metrics: dict[str, Any]) -> dict[str, float]:
+    """Establish artifact identity by behaviour when its bytes are not a match.
+
+    A joblib file is **not byte-reproducible across machines**. The checksum in
+    ``rf_metrics.json`` is written by whichever machine last ran the training
+    notebook, so a teammate who rebuilds from the same seed and the same frozen
+    data gets an identical forest inside a differently-compressed file. Byte
+    equality therefore answers "which machine wrote this?", not "is this the
+    documented model?" -- and enforcing it makes every local rebuild fail.
+
+    Reproducing the logged test metrics answers the question that actually
+    matters. Combined with ``_validate_model`` (pipeline shape, feature order,
+    one-hot levels, encoded width) and the scikit-learn version check, a forest
+    that scores the frozen, hash-verified test set to within ``METRIC_TOLERANCE``
+    of the logged R^2 and MAE is the documented model.
+
+    Network integrity is unaffected: ``backend.artifacts.download_artifact``
+    verifies the checksum while streaming and refuses to promote mismatched
+    bytes, so downloaded artifacts are still byte-checked before they are ever
+    written to disk. This fallback only admits a locally built file.
+    """
+    manifest = _manifest()
+    _validate_frozen_csv(TEST_PATH, manifest["sha256"]["test.csv"])
+    test = pd.read_csv(TEST_PATH)
+
+    predicted = np.asarray(model.predict(test.loc[:, list(FEATURE_COLS)]), dtype=float)
+    observed = np.asarray(test[manifest["target"]], dtype=float)
+    if not np.isfinite(predicted).all():
+        raise ModelContractError("The artifact produced a non-finite test prediction.")
+
+    residual = observed - predicted
+    r2 = float(1 - (residual**2).sum() / ((observed - observed.mean()) ** 2).sum())
+    mae = float(np.abs(residual).mean())
+
+    logged = metrics.get("metrics", {}).get("test", {})
+    for name, got, want in (("R2", r2, logged.get("R2")), ("MAE", mae, logged.get("MAE"))):
+        if want is None:
+            raise ModelContractError(f"The model metadata has no logged test {name}.")
+        if abs(got - float(want)) > METRIC_TOLERANCE:
+            raise ModelContractError(
+                "The artifact is not the model its metadata describes: it scores "
+                f"test {name} {got:.4f}, but the metadata logs {float(want):.4f}."
+            )
+    return {"R2": r2, "MAE": mae}
+
+
 @lru_cache(maxsize=1)
 def _load_model() -> Any:
-    """Load once, refusing mismatched bytes, versions, schema, or encoding."""
+    """Load once, refusing mismatched versions, schema, encoding, or behaviour.
+
+    Byte equality with the committed checksum is the fast path. When it fails,
+    the artifact is admitted only if it reproduces the logged test metrics --
+    see :func:`_verify_rebuilt_artifact` for why bytes alone cannot decide this.
+    """
     path = _configured_path(MODEL_PATH_ENV, DEFAULT_MODEL_PATH)
     if not path.is_file():
+        _fetch_canonical_artifact(path)
+    if not path.is_file():
         raise ModelArtifactUnavailable(
-            f"No trained artifact exists at {path}. Run "
-            "notebooks/train_random_forest.ipynb to produce "
-            "models/rf_eff_rate.joblib, or set TAX_MODEL_PATH."
+            f"No trained artifact exists at {path} and it could not be fetched. "
+            "Run notebooks/train_random_forest.ipynb to produce "
+            "models/rf_eff_rate.joblib, run scripts/fetch_model.py to download "
+            "the canonical build, or set TAX_MODEL_PATH."
         )
 
     metrics = _metrics()
     expected_hash = metrics.get("final_model", {}).get("artifact_sha256")
     if not expected_hash:
         raise ModelContractError("The model metadata has no artifact checksum.")
-    actual_hash = _sha256(path)
-    if actual_hash != expected_hash:
-        raise ModelContractError(
-            "The model artifact checksum does not match its metadata "
-            f"(expected {expected_hash}, got {actual_hash})."
-        )
+    bytes_match = _sha256(path) == expected_hash
 
     joblib, sklearn_version = _require_model_dependency()
     trained_version = str(metrics["final_model"]["sklearn_version"])
@@ -411,6 +545,16 @@ def _load_model() -> Any:
     except Exception as error:
         raise ModelArtifactUnavailable(f"The trained artifact could not be loaded: {error}") from error
     _validate_model(model, metrics)
+    if not bytes_match:
+        scored = _verify_rebuilt_artifact(model, metrics)
+        warnings.warn(
+            "The model artifact does not match the checksum in its metadata, but "
+            f"reproduces the logged test metrics (R2 {scored['R2']:.4f}, MAE "
+            f"{scored['MAE']:.4f}) and is being used. This is expected for a locally "
+            "rebuilt artifact: joblib files are not byte-reproducible across machines.",
+            RuntimeWarning,
+            stacklevel=2,
+        )
     return model
 
 

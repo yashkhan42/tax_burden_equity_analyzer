@@ -22,3 +22,8 @@ models/*.joblib
 # never runs npm, so an uncommitted build means a blank page on deploy.
 node_modules/
 components/*/.vite/
+
+# SHAP batch checkpoints — intermediate state, superseded by
+# reports/shap/shap_values_encoded.npy once the run completes
+reports/shap/chunks/
+reports/shap/batch.log

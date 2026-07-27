@@ -1,0 +1,1096 @@
+{
+  "phase": 4,
+  "spec": "README \u00a75.1 (SHAP TreeExplainer: global summary + per-filer waterfall)",
+  "units": "effective-rate percentage points",
+  "baseline": 5.310294,
+  "baseline_meaning": "average predicted effective rate; the start of every waterfall",
+  "source": {
+    "data": "data/processed/test.csv (frozen)",
+    "sampled_rows": 4000,
+    "random_state": 42,
+    "model_metrics": {
+      "R2": 0.9005,
+      "MAE": 1.277
+    }
+  },
+  "global_importance": [
+    {
+      "feature": "unit_inctot",
+      "mean_abs_shap_pts": 5.899546,
+      "mean_signed_shap_pts": 0.304685
+    },
+    {
+      "feature": "filing_status",
+      "mean_abs_shap_pts": 3.371798,
+      "mean_signed_shap_pts": -0.1768
+    },
+    {
+      "feature": "nchild",
+      "mean_abs_shap_pts": 1.039418,
+      "mean_signed_shap_pts": 0.156082
+    },
+    {
+      "feature": "wage_share",
+      "mean_abs_shap_pts": 0.619129,
+      "mean_signed_shap_pts": -0.128144
+    },
+    {
+      "feature": "age",
+      "mean_abs_shap_pts": 0.496061,
+      "mean_signed_shap_pts": -0.007519
+    },
+    {
+      "feature": "famsize",
+      "mean_abs_shap_pts": 0.481639,
+      "mean_signed_shap_pts": -0.037376
+    },
+    {
+      "feature": "interest_share",
+      "mean_abs_shap_pts": 0.455095,
+      "mean_signed_shap_pts": -0.014664
+    },
+    {
+      "feature": "marst",
+      "mean_abs_shap_pts": 0.443133,
+      "mean_signed_shap_pts": 0.008962
+    },
+    {
+      "feature": "socsec_share",
+      "mean_abs_shap_pts": 0.323861,
+      "mean_signed_shap_pts": 0.094248
+    },
+    {
+      "feature": "dividend_share",
+      "mean_abs_shap_pts": 0.139498,
+      "mean_signed_shap_pts": -0.016922
+    },
+    {
+      "feature": "nchlt5",
+      "mean_abs_shap_pts": 0.137186,
+      "mean_signed_shap_pts": 0.027678
+    },
+    {
+      "feature": "business_share",
+      "mean_abs_shap_pts": 0.102519,
+      "mean_signed_shap_pts": 0.008425
+    },
+    {
+      "feature": "spouse_income_share",
+      "mean_abs_shap_pts": 0.074212,
+      "mean_signed_shap_pts": 0.020573
+    },
+    {
+      "feature": "statefip",
+      "mean_abs_shap_pts": 0.043726,
+      "mean_signed_shap_pts": 0.016144
+    },
+    {
+      "feature": "retirement_share",
+      "mean_abs_shap_pts": 0.006187,
+      "mean_signed_shap_pts": -0.003616
+    },
+    {
+      "feature": "rent_share",
+      "mean_abs_shap_pts": 0.005901,
+      "mean_signed_shap_pts": -0.002025
+    }
+  ],
+  "archetypes": {
+    "median filer": {
+      "sample_row": 99,
+      "test_csv_row": 370,
+      "baseline": 5.310294,
+      "predicted": 7.000923,
+      "actual": 7.182292,
+      "reasons": [
+        {
+          "feature": "unit_inctot",
+          "value": 39305.0,
+          "points": -4.223132
+        },
+        {
+          "feature": "filing_status",
+          "value": 5.0,
+          "points": 2.879382
+        },
+        {
+          "feature": "wage_share",
+          "value": 0.9922401730059788,
+          "points": 0.592372
+        },
+        {
+          "feature": "nchild",
+          "value": 0.0,
+          "points": 0.498931
+        },
+        {
+          "feature": "socsec_share",
+          "value": 0.0,
+          "points": 0.444455
+        }
+      ],
+      "remainder": 1.498621,
+      "contributions": {
+        "unit_inctot": -4.223132,
+        "wage_share": 0.592372,
+        "business_share": 0.034605,
+        "interest_share": 0.320146,
+        "dividend_share": 0.357387,
+        "retirement_share": -0.000932,
+        "socsec_share": 0.444455,
+        "rent_share": -0.001456,
+        "spouse_income_share": 0.05797,
+        "age": 0.249117,
+        "nchild": 0.498931,
+        "nchlt5": 0.053185,
+        "famsize": 0.178766,
+        "filing_status": 2.879382,
+        "marst": 0.22987,
+        "statefip": 0.019961
+      },
+      "profile": {
+        "unit_inctot": 39305.0,
+        "wage_share": 0.9922401730059788,
+        "business_share": 0.0,
+        "interest_share": 0.0052156214222109,
+        "dividend_share": 0.0025442055718102,
+        "retirement_share": 0.0,
+        "socsec_share": 0.0,
+        "rent_share": 0.0,
+        "spouse_income_share": 0.0,
+        "age": 64.0,
+        "nchild": 0.0,
+        "nchlt5": 0.0,
+        "famsize": 1.0,
+        "filing_status": 5.0,
+        "marst": 5.0,
+        "statefip": 20.0
+      }
+    },
+    "high income, capital-heavy": {
+      "sample_row": 2302,
+      "test_csv_row": 7027,
+      "baseline": 5.310294,
+      "predicted": 23.394674,
+      "actual": 19.653419,
+      "reasons": [
+        {
+          "feature": "unit_inctot",
+          "value": 1083339.0,
+          "points": 18.354386
+        },
+        {
+          "feature": "dividend_share",
+          "value": 0.9230711716277176,
+          "points": -1.839831
+        },
+        {
+          "feature": "filing_status",
+          "value": 5.0,
+          "points": 1.670006
+        },
+        {
+          "feature": "wage_share",
+          "value": 0.0,
+          "points": -1.388133
+        },
+        {
+          "feature": "marst",
+          "value": 5.0,
+          "points": 0.334918
+        }
+      ],
+      "remainder": 0.953034,
+      "contributions": {
+        "unit_inctot": 18.354386,
+        "wage_share": -1.388133,
+        "business_share": 0.112561,
+        "interest_share": 0.224335,
+        "dividend_share": -1.839831,
+        "retirement_share": -0.023755,
+        "socsec_share": 0.208709,
+        "rent_share": -0.042185,
+        "spouse_income_share": 0.201253,
+        "age": -0.242916,
+        "nchild": 0.285602,
+        "nchlt5": 0.039557,
+        "famsize": 0.156876,
+        "filing_status": 1.670006,
+        "marst": 0.334918,
+        "statefip": 0.032997
+      },
+      "profile": {
+        "unit_inctot": 1083339.0,
+        "wage_share": 0.0,
+        "business_share": 0.0,
+        "interest_share": 0.027693085913089,
+        "dividend_share": 0.9230711716277176,
+        "retirement_share": 0.00974764132003,
+        "socsec_share": 0.030626609030045,
+        "rent_share": 0.0,
+        "spouse_income_share": 0.0,
+        "age": 80.0,
+        "nchild": 0.0,
+        "nchlt5": 0.0,
+        "famsize": 1.0,
+        "filing_status": 5.0,
+        "marst": 5.0,
+        "statefip": 6.0
+      }
+    },
+    "high income, wage-heavy": {
+      "sample_row": 2902,
+      "test_csv_row": 8871,
+      "baseline": 5.310294,
+      "predicted": 14.172981,
+      "actual": 14.894047,
+      "reasons": [
+        {
+          "feature": "unit_inctot",
+          "value": 222632.0,
+          "points": 8.327856
+        },
+        {
+          "feature": "filing_status",
+          "value": 1.0,
+          "points": -1.523073
+        },
+        {
+          "feature": "nchild",
+          "value": 0.0,
+          "points": 1.01122
+        },
+        {
+          "feature": "famsize",
+          "value": 2.0,
+          "points": 0.674542
+        },
+        {
+          "feature": "wage_share",
+          "value": 0.9522440619497646,
+          "points": 0.34769
+        }
+      ],
+      "remainder": 0.024452,
+      "contributions": {
+        "unit_inctot": 8.327856,
+        "wage_share": 0.34769,
+        "business_share": 0.119226,
+        "interest_share": 0.093097,
+        "dividend_share": -0.071265,
+        "retirement_share": -0.002623,
+        "socsec_share": 0.238886,
+        "rent_share": 0.002672,
+        "spouse_income_share": -0.103536,
+        "age": 0.038586,
+        "nchild": 1.01122,
+        "nchlt5": 0.074832,
+        "famsize": 0.674542,
+        "filing_status": -1.523073,
+        "marst": -0.344118,
+        "statefip": -0.021305
+      },
+      "profile": {
+        "unit_inctot": 222632.0,
+        "wage_share": 0.9522440619497646,
+        "business_share": 0.0,
+        "interest_share": 4.491717273347947e-06,
+        "dividend_share": 0.0,
+        "retirement_share": 0.0,
+        "socsec_share": 0.0,
+        "rent_share": 0.0112292931833698,
+        "spouse_income_share": 0.0365221531495921,
+        "age": 47.0,
+        "nchild": 0.0,
+        "nchlt5": 0.0,
+        "famsize": 2.0,
+        "filing_status": 1.0,
+        "marst": 1.0,
+        "statefip": 37.0
+      }
+    },
+    "negative rate, children": {
+      "sample_row": 35,
+      "test_csv_row": 106,
+      "baseline": 5.310294,
+      "predicted": -41.434589,
+      "actual": -49.642857,
+      "reasons": [
+        {
+          "feature": "unit_inctot",
+          "value": 7000.0,
+          "points": -23.878197
+        },
+        {
+          "feature": "filing_status",
+          "value": 4.0,
+          "points": -15.591154
+        },
+        {
+          "feature": "nchild",
+          "value": 4.0,
+          "points": -3.136743
+        },
+        {
+          "feature": "interest_share",
+          "value": 0.0,
+          "points": -1.311914
+        },
+        {
+          "feature": "wage_share",
+          "value": 1.0,
+          "points": -1.24337
+        }
+      ],
+      "remainder": -1.583505,
+      "contributions": {
+        "unit_inctot": -23.878197,
+        "wage_share": -1.24337,
+        "business_share": 0.116127,
+        "interest_share": -1.311914,
+        "dividend_share": -0.267891,
+        "retirement_share": -0.001448,
+        "socsec_share": 0.039541,
+        "rent_share": -0.01754,
+        "spouse_income_share": -0.052317,
+        "age": -0.934809,
+        "nchild": -3.136743,
+        "nchlt5": 0.11085,
+        "famsize": -1.033226,
+        "filing_status": -15.591154,
+        "marst": 0.254773,
+        "statefip": 0.202436
+      },
+      "profile": {
+        "unit_inctot": 7000.0,
+        "wage_share": 1.0,
+        "business_share": 0.0,
+        "interest_share": 0.0,
+        "dividend_share": 0.0,
+        "retirement_share": 0.0,
+        "socsec_share": 0.0,
+        "rent_share": 0.0,
+        "spouse_income_share": 0.0,
+        "age": 42.0,
+        "nchild": 4.0,
+        "nchlt5": 0.0,
+        "famsize": 6.0,
+        "filing_status": 4.0,
+        "marst": 6.0,
+        "statefip": 37.0
+      }
+    },
+    "matched (income, 0 kids) \u2014 single": {
+      "sample_row": 703,
+      "test_csv_row": 2073,
+      "baseline": 5.310294,
+      "predicted": 7.279761,
+      "actual": 7.295,
+      "reasons": [
+        {
+          "feature": "filing_status",
+          "value": 5.0,
+          "points": 3.32864
+        },
+        {
+          "feature": "unit_inctot",
+          "value": 40000.0,
+          "points": -2.533269
+        },
+        {
+          "feature": "nchild",
+          "value": 0.0,
+          "points": 0.742872
+        },
+        {
+          "feature": "wage_share",
+          "value": 1.0,
+          "points": 0.631474
+        },
+        {
+          "feature": "famsize",
+          "value": 5.0,
+          "points": -0.556144
+        }
+      ],
+      "remainder": 0.355894,
+      "contributions": {
+        "unit_inctot": -2.533269,
+        "wage_share": 0.631474,
+        "business_share": 0.026977,
+        "interest_share": -0.487464,
+        "dividend_share": -0.066086,
+        "retirement_share": -0.001485,
+        "socsec_share": 0.314016,
+        "rent_share": -0.001819,
+        "spouse_income_share": 0.058743,
+        "age": 0.014744,
+        "nchild": 0.742872,
+        "nchlt5": 0.075155,
+        "famsize": -0.556144,
+        "filing_status": 3.32864,
+        "marst": 0.408633,
+        "statefip": 0.014481
+      },
+      "profile": {
+        "unit_inctot": 40000.0,
+        "wage_share": 1.0,
+        "business_share": 0.0,
+        "interest_share": 0.0,
+        "dividend_share": 0.0,
+        "retirement_share": 0.0,
+        "socsec_share": 0.0,
+        "rent_share": 0.0,
+        "spouse_income_share": 0.0,
+        "age": 49.0,
+        "nchild": 0.0,
+        "nchlt5": 0.0,
+        "famsize": 5.0,
+        "filing_status": 5.0,
+        "marst": 3.0,
+        "statefip": 39.0
+      }
+    },
+    "matched (income, 0 kids) \u2014 joint": {
+      "sample_row": 2882,
+      "test_csv_row": 8825,
+      "baseline": 5.310294,
+      "predicted": -0.489976,
+      "actual": 3.075,
+      "reasons": [
+        {
+          "feature": "unit_inctot",
+          "value": 40000.0,
+          "points": -4.544803
+        },
+        {
+          "feature": "nchild",
+          "value": 0.0,
+          "points": 3.071531
+        },
+        {
+          "feature": "filing_status",
+          "value": 1.0,
+          "points": -2.716509
+        },
+        {
+          "feature": "wage_share",
+          "value": 0.0,
+          "points": -0.792715
+        },
+        {
+          "feature": "marst",
+          "value": 1.0,
+          "points": -0.595716
+        }
+      ],
+      "remainder": -0.222058,
+      "contributions": {
+        "unit_inctot": -4.544803,
+        "wage_share": -0.792715,
+        "business_share": 0.039727,
+        "interest_share": -0.496779,
+        "dividend_share": -0.079214,
+        "retirement_share": -0.003937,
+        "socsec_share": 0.472913,
+        "rent_share": -0.002314,
+        "spouse_income_share": -0.044781,
+        "age": -0.026392,
+        "nchild": 3.071531,
+        "nchlt5": 0.269083,
+        "famsize": -0.518135,
+        "filing_status": -2.716509,
+        "marst": -0.595716,
+        "statefip": 0.16777
+      },
+      "profile": {
+        "unit_inctot": 40000.0,
+        "wage_share": 0.0,
+        "business_share": 0.0,
+        "interest_share": 0.0,
+        "dividend_share": 0.0,
+        "retirement_share": 0.0,
+        "socsec_share": 0.0,
+        "rent_share": 0.0,
+        "spouse_income_share": 1.0,
+        "age": 49.0,
+        "nchild": 0.0,
+        "nchlt5": 0.0,
+        "famsize": 3.0,
+        "filing_status": 1.0,
+        "marst": 1.0,
+        "statefip": 6.0
+      }
+    }
+  },
+  "random_sample": [
+    {
+      "sample_row": 343,
+      "test_csv_row": 1108,
+      "baseline": 5.310294,
+      "predicted": 10.662763,
+      "actual": 10.787867,
+      "reasons": [
+        {
+          "feature": "unit_inctot",
+          "value": 141001.0,
+          "points": 4.787437
+        },
+        {
+          "feature": "filing_status",
+          "value": 1.0,
+          "points": -1.534898
+        },
+        {
+          "feature": "nchild",
+          "value": 0.0,
+          "points": 0.837066
+        },
+        {
+          "feature": "famsize",
+          "value": 2.0,
+          "points": 0.575048
+        },
+        {
+          "feature": "age",
+          "value": 65.0,
+          "points": 0.432634
+        }
+      ],
+      "remainder": 0.255183,
+      "contributions": {
+        "unit_inctot": 4.787437,
+        "wage_share": -0.109637,
+        "business_share": 0.06076,
+        "interest_share": 0.334326,
+        "dividend_share": -0.043177,
+        "retirement_share": -0.004445,
+        "socsec_share": 0.246591,
+        "rent_share": 0.000603,
+        "spouse_income_share": -0.031608,
+        "age": 0.432634,
+        "nchild": 0.837066,
+        "nchlt5": 0.082366,
+        "famsize": 0.575048,
+        "filing_status": -1.534898,
+        "marst": -0.32212,
+        "statefip": 0.041524
+      },
+      "profile": {
+        "unit_inctot": 141001.0,
+        "wage_share": 0.6382933454372665,
+        "business_share": 0.0,
+        "interest_share": 0.0070992404309189,
+        "dividend_share": 0.0,
+        "retirement_share": 0.0,
+        "socsec_share": 0.0,
+        "rent_share": 0.0,
+        "spouse_income_share": 0.3546074141318147,
+        "age": 65.0,
+        "nchild": 0.0,
+        "nchlt5": 0.0,
+        "famsize": 2.0,
+        "filing_status": 1.0,
+        "marst": 1.0,
+        "statefip": 34.0
+      }
+    },
+    {
+      "sample_row": 356,
+      "test_csv_row": 1152,
+      "baseline": 5.310294,
+      "predicted": -0.003344,
+      "actual": 0.0,
+      "reasons": [
+        {
+          "feature": "unit_inctot",
+          "value": 26500.0,
+          "points": -6.347882
+        },
+        {
+          "feature": "filing_status",
+          "value": 5.0,
+          "points": 2.22235
+        },
+        {
+          "feature": "socsec_share",
+          "value": 0.9056603773584906,
+          "points": -1.934093
+        },
+        {
+          "feature": "wage_share",
+          "value": 0.0,
+          "points": -1.135309
+        },
+        {
+          "feature": "nchild",
+          "value": 0.0,
+          "points": 0.505843
+        }
+      ],
+      "remainder": 1.375452,
+      "contributions": {
+        "unit_inctot": -6.347882,
+        "wage_share": -1.135309,
+        "business_share": 0.03251,
+        "interest_share": 0.393303,
+        "dividend_share": -0.078771,
+        "retirement_share": -0.010579,
+        "socsec_share": -1.934093,
+        "rent_share": -0.006355,
+        "spouse_income_share": 0.063228,
+        "age": 0.44915,
+        "nchild": 0.505843,
+        "nchlt5": 0.067337,
+        "famsize": 0.21813,
+        "filing_status": 2.22235,
+        "marst": 0.221943,
+        "statefip": 0.025555
+      },
+      "profile": {
+        "unit_inctot": 26500.0,
+        "wage_share": 0.0,
+        "business_share": 0.0,
+        "interest_share": 0.0943396226415094,
+        "dividend_share": 0.0,
+        "retirement_share": 0.0,
+        "socsec_share": 0.9056603773584906,
+        "rent_share": 0.0,
+        "spouse_income_share": 0.0,
+        "age": 71.0,
+        "nchild": 0.0,
+        "nchlt5": 0.0,
+        "famsize": 1.0,
+        "filing_status": 5.0,
+        "marst": 3.0,
+        "statefip": 6.0
+      }
+    },
+    {
+      "sample_row": 1730,
+      "test_csv_row": 5318,
+      "baseline": 5.310294,
+      "predicted": 8.051407,
+      "actual": 8.16524,
+      "reasons": [
+        {
+          "feature": "unit_inctot",
+          "value": 98160.0,
+          "points": 3.137451
+        },
+        {
+          "feature": "filing_status",
+          "value": 1.0,
+          "points": -1.429036
+        },
+        {
+          "feature": "nchild",
+          "value": 0.0,
+          "points": 1.426741
+        },
+        {
+          "feature": "famsize",
+          "value": 2.0,
+          "points": 0.729831
+        },
+        {
+          "feature": "interest_share",
+          "value": 0.0,
+          "points": -0.567269
+        }
+      ],
+      "remainder": -0.556604,
+      "contributions": {
+        "unit_inctot": 3.137451,
+        "wage_share": -0.381822,
+        "business_share": 0.035375,
+        "interest_share": -0.567269,
+        "dividend_share": -0.06428,
+        "retirement_share": -0.003948,
+        "socsec_share": 0.276693,
+        "rent_share": -0.001232,
+        "spouse_income_share": -0.011328,
+        "age": -0.300171,
+        "nchild": 1.426741,
+        "nchlt5": 0.115607,
+        "famsize": 0.729831,
+        "filing_status": -1.429036,
+        "marst": -0.276242,
+        "statefip": 0.054745
+      },
+      "profile": {
+        "unit_inctot": 98160.0,
+        "wage_share": 0.4788101059494702,
+        "business_share": 0.0,
+        "interest_share": 0.0,
+        "dividend_share": 0.0,
+        "retirement_share": 0.0,
+        "socsec_share": 0.0,
+        "rent_share": 0.0,
+        "spouse_income_share": 0.5211898940505297,
+        "age": 39.0,
+        "nchild": 0.0,
+        "nchlt5": 0.0,
+        "famsize": 2.0,
+        "filing_status": 1.0,
+        "marst": 1.0,
+        "statefip": 38.0
+      }
+    },
+    {
+      "sample_row": 1753,
+      "test_csv_row": 5370,
+      "baseline": 5.310294,
+      "predicted": 9.540356,
+      "actual": 9.841497,
+      "reasons": [
+        {
+          "feature": "filing_status",
+          "value": 5.0,
+          "points": 2.819158
+        },
+        {
+          "feature": "unit_inctot",
+          "value": 67002.0,
+          "points": -0.466081
+        },
+        {
+          "feature": "nchild",
+          "value": 0.0,
+          "points": 0.443034
+        },
+        {
+          "feature": "wage_share",
+          "value": 0.9999701501447718,
+          "points": 0.40276
+        },
+        {
+          "feature": "marst",
+          "value": 5.0,
+          "points": 0.235224
+        }
+      ],
+      "remainder": 0.795967,
+      "contributions": {
+        "unit_inctot": -0.466081,
+        "wage_share": 0.40276,
+        "business_share": 0.040887,
+        "interest_share": 0.146943,
+        "dividend_share": -0.068348,
+        "retirement_share": -0.002492,
+        "socsec_share": 0.227591,
+        "rent_share": -0.00158,
+        "spouse_income_share": 0.071673,
+        "age": 0.146073,
+        "nchild": 0.443034,
+        "nchlt5": 0.045516,
+        "famsize": 0.145575,
+        "filing_status": 2.819158,
+        "marst": 0.235224,
+        "statefip": 0.044131
+      },
+      "profile": {
+        "unit_inctot": 67002.0,
+        "wage_share": 0.9999701501447718,
+        "business_share": 0.0,
+        "interest_share": 2.9849855228202145e-05,
+        "dividend_share": 0.0,
+        "retirement_share": 0.0,
+        "socsec_share": 0.0,
+        "rent_share": 0.0,
+        "spouse_income_share": 0.0,
+        "age": 65.0,
+        "nchild": 0.0,
+        "nchlt5": 0.0,
+        "famsize": 1.0,
+        "filing_status": 5.0,
+        "marst": 5.0,
+        "statefip": 34.0
+      }
+    },
+    {
+      "sample_row": 2615,
+      "test_csv_row": 8038,
+      "baseline": 5.310294,
+      "predicted": 1.47634,
+      "actual": 2.130682,
+      "reasons": [
+        {
+          "feature": "unit_inctot",
+          "value": 17600.0,
+          "points": -9.059655
+        },
+        {
+          "feature": "filing_status",
+          "value": 5.0,
+          "points": 2.741692
+        },
+        {
+          "feature": "nchild",
+          "value": 0.0,
+          "points": 0.596733
+        },
+        {
+          "feature": "interest_share",
+          "value": 0.1136363636363636,
+          "points": 0.568202
+        },
+        {
+          "feature": "age",
+          "value": 58.0,
+          "points": 0.54043
+        }
+      ],
+      "remainder": 0.778644,
+      "contributions": {
+        "unit_inctot": -9.059655,
+        "wage_share": -0.368632,
+        "business_share": 0.191936,
+        "interest_share": 0.568202,
+        "dividend_share": -0.089704,
+        "retirement_share": -0.009223,
+        "socsec_share": 0.403549,
+        "rent_share": -0.002819,
+        "spouse_income_share": 0.050602,
+        "age": 0.54043,
+        "nchild": 0.596733,
+        "nchlt5": 0.078936,
+        "famsize": 0.253437,
+        "filing_status": 2.741692,
+        "marst": 0.241546,
+        "statefip": 0.029016
+      },
+      "profile": {
+        "unit_inctot": 17600.0,
+        "wage_share": 0.0,
+        "business_share": 0.0,
+        "interest_share": 0.1136363636363636,
+        "dividend_share": 0.0,
+        "retirement_share": 0.0,
+        "socsec_share": 0.0,
+        "rent_share": 0.0,
+        "spouse_income_share": 0.0,
+        "age": 58.0,
+        "nchild": 0.0,
+        "nchlt5": 0.0,
+        "famsize": 2.0,
+        "filing_status": 5.0,
+        "marst": 4.0,
+        "statefip": 29.0
+      }
+    },
+    {
+      "sample_row": 2789,
+      "test_csv_row": 8524,
+      "baseline": 5.310294,
+      "predicted": -20.41022,
+      "actual": -15.14,
+      "reasons": [
+        {
+          "feature": "filing_status",
+          "value": 4.0,
+          "points": -11.644591
+        },
+        {
+          "feature": "nchild",
+          "value": 4.0,
+          "points": -6.299231
+        },
+        {
+          "feature": "unit_inctot",
+          "value": 40000.0,
+          "points": -5.460941
+        },
+        {
+          "feature": "famsize",
+          "value": 5.0,
+          "points": -1.514278
+        },
+        {
+          "feature": "age",
+          "value": 38.0,
+          "points": -1.505251
+        }
+      ],
+      "remainder": 0.703778,
+      "contributions": {
+        "unit_inctot": -5.460941,
+        "wage_share": 1.087363,
+        "business_share": 0.037434,
+        "interest_share": -1.049937,
+        "dividend_share": -0.148784,
+        "retirement_share": -0.001241,
+        "socsec_share": 0.142245,
+        "rent_share": -0.008018,
+        "spouse_income_share": 0.025324,
+        "age": -1.505251,
+        "nchild": -6.299231,
+        "nchlt5": 0.126433,
+        "famsize": -1.514278,
+        "filing_status": -11.644591,
+        "marst": 0.400109,
+        "statefip": 0.092849
+      },
+      "profile": {
+        "unit_inctot": 40000.0,
+        "wage_share": 1.0,
+        "business_share": 0.0,
+        "interest_share": 0.0,
+        "dividend_share": 0.0,
+        "retirement_share": 0.0,
+        "socsec_share": 0.0,
+        "rent_share": 0.0,
+        "spouse_income_share": 0.0,
+        "age": 38.0,
+        "nchild": 4.0,
+        "nchlt5": 0.0,
+        "famsize": 5.0,
+        "filing_status": 4.0,
+        "marst": 4.0,
+        "statefip": 36.0
+      }
+    },
+    {
+      "sample_row": 3091,
+      "test_csv_row": 9392,
+      "baseline": 5.310294,
+      "predicted": 11.124071,
+      "actual": 10.961164,
+      "reasons": [
+        {
+          "feature": "unit_inctot",
+          "value": 187325.0,
+          "points": 10.397382
+        },
+        {
+          "feature": "filing_status",
+          "value": 1.0,
+          "points": -2.047594
+        },
+        {
+          "feature": "nchild",
+          "value": 2.0,
+          "points": -1.067886
+        },
+        {
+          "feature": "interest_share",
+          "value": 0.112104630988923,
+          "points": 0.695414
+        },
+        {
+          "feature": "famsize",
+          "value": 4.0,
+          "points": -0.532204
+        }
+      ],
+      "remainder": -1.631334,
+      "contributions": {
+        "unit_inctot": 10.397382,
+        "wage_share": -0.248766,
+        "business_share": 0.05512,
+        "interest_share": 0.695414,
+        "dividend_share": -0.113276,
+        "retirement_share": -0.002741,
+        "socsec_share": 0.164385,
+        "rent_share": 1.4e-05,
+        "spouse_income_share": -0.055083,
+        "age": -0.528936,
+        "nchild": -1.067886,
+        "nchlt5": -0.474543,
+        "famsize": -0.532204,
+        "filing_status": -2.047594,
+        "marst": -0.466146,
+        "statefip": 0.038638
+      },
+      "profile": {
+        "unit_inctot": 187325.0,
+        "wage_share": 0.5872147337515013,
+        "business_share": 0.0,
+        "interest_share": 0.112104630988923,
+        "dividend_share": 0.0,
+        "retirement_share": 0.0,
+        "socsec_share": 0.0,
+        "rent_share": 0.0,
+        "spouse_income_share": 0.3006806352595756,
+        "age": 35.0,
+        "nchild": 2.0,
+        "nchlt5": 2.0,
+        "famsize": 4.0,
+        "filing_status": 1.0,
+        "marst": 1.0,
+        "statefip": 10.0
+      }
+    },
+    {
+      "sample_row": 3432,
+      "test_csv_row": 10481,
+      "baseline": 5.310294,
+      "predicted": 13.52376,
+      "actual": 14.750909,
+      "reasons": [
+        {
+          "feature": "unit_inctot",
+          "value": 220000.0,
+          "points": 11.246582
+        },
+        {
+          "feature": "filing_status",
+          "value": 1.0,
+          "points": -1.734339
+        },
+        {
+          "feature": "age",
+          "value": 58.0,
+          "points": 1.089839
+        },
+        {
+          "feature": "nchild",
+          "value": 2.0,
+          "points": -0.961904
+        },
+        {
+          "feature": "interest_share",
+          "value": 0.0,
+          "points": -0.702059
+        }
+      ],
+      "remainder": -0.724651,
+      "contributions": {
+        "unit_inctot": 11.246582,
+        "wage_share": -0.286817,
+        "business_share": 0.094197,
+        "interest_share": -0.702059,
+        "dividend_share": -0.054065,
+        "retirement_share": -0.002807,
+        "socsec_share": 0.171791,
+        "rent_share": 0.00834,
+        "spouse_income_share": 0.034838,
+        "age": 1.089839,
+        "nchild": -0.961904,
+        "nchlt5": 0.114863,
+        "famsize": -0.42309,
+        "filing_status": -1.734339,
+        "marst": -0.411865,
+        "statefip": 0.029965
+      },
+      "profile": {
+        "unit_inctot": 220000.0,
+        "wage_share": 0.5454545454545454,
+        "business_share": 0.0,
+        "interest_share": 0.0,
+        "dividend_share": 0.0,
+        "retirement_share": 0.0,
+        "socsec_share": 0.0,
+        "rent_share": 0.0,
+        "spouse_income_share": 0.4545454545454545,
+        "age": 58.0,
+        "nchild": 2.0,
+        "nchlt5": 0.0,
+        "famsize": 4.0,
+        "filing_status": 1.0,
+        "marst": 1.0,
+        "statefip": 25.0
+      }
+    }
+  ]
+}
