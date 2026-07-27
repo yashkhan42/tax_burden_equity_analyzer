@@ -259,9 +259,9 @@
       "verbose": 0,
       "warm_start": false
     },
-    "fit_seconds": 26.4,
+    "fit_seconds": 8.2,
     "artifact": "models/rf_eff_rate.joblib",
-    "artifact_sha256": "7b78751aecad6c3b0c3f794d91e17d2f41839e338ef9de39a17572d2dc4d0b90",
+    "artifact_sha256": "d74f152150f84e0c933a25d8f8a2920df6a27a6527acc9e5554880e174c6750d",
     "artifact_mb": 275.7
   },
   "metrics": {
