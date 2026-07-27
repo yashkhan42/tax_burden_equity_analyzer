@@ -1,5 +1,4 @@
-# Streamlit demo runtime. Modeling dependencies are added when the Phase 3
-# artifact is wired through model_interface.py.
+# Streamlit fallback runtime.
 streamlit==1.60.0
 pandas==2.3.3
 altair==6.2.2
@@ -29,3 +28,7 @@ scikit-learn==1.7.2
 joblib==1.5.3
 shap==0.52.0
 matplotlib==3.11.1
+
+# Standalone website API.
+fastapi==0.139.2
+uvicorn==0.51.0

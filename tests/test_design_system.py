@@ -11,6 +11,7 @@ Three classes of drift this catches:
 2. A component ships without its production build, which deploys as a blank
    iframe on Community Cloud, where npm never runs.
 3. The frozen modelling schema moves under us.
+4. The generated website CSS drifts from the shared token source.
 """
 
 from __future__ import annotations
@@ -54,6 +55,21 @@ def test_both_modes_define_every_role() -> None:
     roles = {"background", "surface", "ink", "muted", "hairline", "shape", "accent", "raised"}
     for mode in ("dark", "light"):
         assert roles <= set(TOKENS[mode]), f"{mode} is missing {roles - set(TOKENS[mode])}"
+
+
+def test_website_css_matches_shared_tokens() -> None:
+    """The standalone site must consume, not fork, the shared visual values."""
+    css = (ROOT / "frontend" / "src" / "styles" / "generated-tokens.css").read_text()
+    assert f"--font-sans: {TOKENS['fontSans']};" in css
+    assert f"--font-mono: {TOKENS['fontMono']};" in css
+    assert f"--font-serif: {TOKENS['fontSerif']};" in css
+    assert f"--radius: {TOKENS['radius']}px;" in css
+    for mode in ("dark", "light"):
+        for role, value in TOKENS[mode].items():
+            assert f"--{role}: {value};" in css, (
+                f"website CSS is missing {mode}.{role}={value}; "
+                "run `npm run tokens:sync` in frontend"
+            )
 
 
 def _luminance(hex_colour: str) -> float:

@@ -1,0 +1,511 @@
+.root {
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-variant-numeric: proportional-nums lining-nums;
+  line-height: 1.5;
+  container-name: viz;
+  container-type: inline-size;
+}
+
+.root,
+.root * {
+  box-sizing: border-box;
+}
+
+.summary {
+  max-width: 60ch;
+  margin: 0;
+  color: var(--ink);
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.62;
+}
+
+.mark {
+  transition:
+    x 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    y 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    width 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    height 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    cx 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    cy 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    x1 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    x2 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    left 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Percentile */
+
+.percentile {
+  margin: 0;
+}
+
+.chartScroller {
+  width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+}
+
+.percentileSvg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.negativeRegion {
+  fill: var(--surface);
+}
+
+.distributionBar {
+  fill: var(--shape);
+}
+
+.axisLine,
+.tickLine {
+  stroke: var(--hairline);
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+}
+
+.zeroTick {
+  stroke: var(--shape);
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+}
+
+.tickText,
+.axisTitle,
+.chartAnnotation,
+.chartAnnotationMuted,
+.zeroLabel,
+.markerLabel {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.tickText,
+.axisTitle,
+.chartAnnotationMuted {
+  fill: var(--muted);
+}
+
+.chartAnnotation,
+.zeroLabel {
+  fill: var(--ink);
+}
+
+.markerLine {
+  stroke: var(--accent);
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+}
+
+.markerDot {
+  fill: var(--accent);
+  stroke: var(--background);
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+}
+
+.markerLabel {
+  fill: var(--accent);
+  font-family: var(--font-sans);
+  font-weight: 600;
+}
+
+.percentile .summary {
+  margin-top: 16px;
+}
+
+/* Contribution */
+
+.contributionFigures {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.figureBlock {
+  min-width: 0;
+  padding: 24px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.figureLabel {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.33;
+}
+
+.figureValue,
+.twinRate {
+  display: block;
+  margin-top: 8px;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 28px;
+  font-weight: 600;
+  font-variant-numeric: proportional-nums lining-nums;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.unitNote {
+  max-width: 60ch;
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.33;
+}
+
+.reasonGroups {
+  margin-top: 32px;
+}
+
+.reasonGroup + .reasonGroup {
+  margin-top: 32px;
+}
+
+.reasonHeading {
+  margin: 0 0 16px;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.33;
+}
+
+.reasonList {
+  display: grid;
+  gap: 16px;
+}
+
+.contributionRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 44%);
+  gap: 24px;
+  align-items: center;
+}
+
+.reasonText {
+  min-width: 0;
+  margin: 0;
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.barArea {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 48px;
+  gap: 16px;
+  align-items: center;
+}
+
+.barTrack {
+  position: relative;
+  height: 14px;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.barZero {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--shape);
+  transform: translateX(-1px);
+}
+
+.barFill {
+  position: absolute;
+  top: 3px;
+  height: 8px;
+}
+
+.barRaised {
+  background: var(--raised);
+}
+
+.barLowered {
+  background: var(--accent);
+}
+
+.points {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: proportional-nums lining-nums;
+  line-height: 1.45;
+  text-align: right;
+}
+
+.pointsRaised {
+  color: var(--raised);
+}
+
+.pointsLowered {
+  color: var(--accent);
+}
+
+.remainder {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--hairline);
+}
+
+.supportingRow .reasonText {
+  color: var(--muted);
+}
+
+.calmState {
+  margin-top: 32px;
+  padding: 24px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.calmTitle {
+  margin: 0;
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.calmCopy {
+  max-width: 60ch;
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+/* Twin */
+
+.twinCards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-flow: column;
+  column-gap: 24px;
+  row-gap: 0;
+  margin: 32px 0 0;
+  padding: 0;
+}
+
+.twinCard {
+  display: grid;
+  grid-template-rows: subgrid;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.twinRow {
+  min-width: 0;
+  margin: 0;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.twinRow dt,
+.twinRow dd {
+  margin: 0;
+}
+
+.twinRow dt {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.33;
+}
+
+.twinRow dd {
+  margin-top: 8px;
+  overflow-wrap: anywhere;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.changedRow dd {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.rateRow {
+  align-self: stretch;
+  padding-top: 24px;
+  padding-bottom: 24px;
+  border-bottom: 0;
+}
+
+.rateRow dd {
+  margin-top: 0;
+}
+
+.gapBlock {
+  margin-top: 32px;
+  padding-top: 32px;
+  border-top: 1px solid var(--hairline);
+}
+
+.gapLabel {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.33;
+}
+
+.gapValue {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  margin: 16px 0 0;
+}
+
+.gapValue strong {
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 28px;
+  font-weight: 600;
+  font-variant-numeric: proportional-nums lining-nums;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.gapValue span {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.sameRate {
+  margin: 16px 0 0;
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-size: 28px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.dumbbell {
+  width: 100%;
+  margin: 24px 0 0;
+}
+
+.dumbbellSvg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.dumbbellAxis {
+  stroke: var(--hairline);
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+}
+
+.dumbbellZero {
+  stroke: var(--shape);
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+}
+
+.dumbbellZeroLabel {
+  fill: var(--muted);
+  font-family: var(--font-sans);
+  font-size: 12px;
+}
+
+.dumbbellConnector {
+  stroke: var(--accent);
+  stroke-linecap: round;
+  stroke-width: 5px;
+  vector-effect: non-scaling-stroke;
+}
+
+.dumbbellDotFirst,
+.dumbbellDotSecond {
+  stroke: none;
+}
+
+.dumbbellDotFirst {
+  fill: var(--ink);
+}
+
+.dumbbellDotSecond {
+  fill: var(--accent);
+}
+
+.stateNote,
+.moneyNote,
+.comparisonNote {
+  max-width: 60ch;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.stateNote {
+  margin: 16px 0 0;
+}
+
+.moneyNote {
+  margin: 8px 0 0;
+  font-variant-numeric: proportional-nums lining-nums;
+}
+
+.comparisonNote {
+  margin: 24px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--hairline);
+}
+
+@container viz (max-width: 560px) {
+  .percentileSvg {
+    min-width: 680px;
+  }
+
+  .contributionFigures {
+    grid-template-columns: 1fr;
+  }
+
+  .contributionRow {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .barArea {
+    grid-template-columns: minmax(0, 1fr) 48px;
+  }
+
+  .twinCards {
+    grid-template-columns: 1fr;
+    grid-auto-flow: row;
+    gap: 16px;
+  }
+
+  .twinCard {
+    display: block;
+    grid-row: auto !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mark {
+    transition: none !important;
+  }
+}
