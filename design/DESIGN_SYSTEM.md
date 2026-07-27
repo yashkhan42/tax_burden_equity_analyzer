@@ -9,6 +9,12 @@ Altair and the React components all read. `.streamlit/config.toml` mirrors the
 palette by hand because TOML cannot import JSON; `tests/test_design_system.py`
 fails if the two ever disagree.
 
+> **Path C website override.** The standalone Next.js site no longer uses the
+> mono/tabular number treatment described below for the retained Streamlit
+> fallback. `design/WEB_SYSTEM.md` is authoritative for the website: numbers
+> use Source Sans Pro with proportional lining numerals while preserving the
+> precision, U+2212 minus, units, rounding, and no-animation rules in §5.
+
 ---
 
 ## 1. The two references, and where they conflict

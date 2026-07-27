@@ -8,9 +8,9 @@ return alone, it does not belong on screen.
 Two layers:
 
 * the value codes the frozen data uses, mapped to how a person would say them
-* `phrase_for`, which turns one model feature and its value into a sentence
-  fragment the contribution chart can print as-is ("having two children at
-  home", "income coming mostly from investments")
+* `phrase_for`, which turns one model feature and its value into a short,
+  sentence-case explanation the contribution chart can print as-is
+  ("Two children live at home", "Most income comes from investments")
 
 Imported by `model_interface` and by the UI; imports neither.
 """
@@ -31,7 +31,7 @@ FILESTAT_LABELS = {
     2: "married, filing together",
     3: "married, filing together",
     4: "head of household",
-    5: "filing alone",
+    5: "filing as a single filer",
 }
 
 #: How the reader chooses it, where they have a choice.
@@ -195,12 +195,11 @@ def age_phrase(age: int) -> str:
 
 
 def phrase_for(feature: str, value: float) -> str:
-    """One model feature and its value, as a sentence fragment.
+    """One model feature and its value, in clear reader-facing language.
 
     This is what turns an attribution into something readable: instead of
-    "nchild: -4.4" the chart prints "having two children at home". Fragments
-    start lower case and carry no punctuation, so the chart can set them
-    directly and a sentence can quote them inline.
+    an internal field and value, the chart prints "Two children live at home".
+    Each phrase starts in sentence case and avoids clipped, machine-like copy.
 
     Returns an empty string for anything with nothing worth saying, which the
     caller drops from the chart.
@@ -209,50 +208,50 @@ def phrase_for(feature: str, value: float) -> str:
 
     if feature in {"inctot", "unit_inctot"}:
         if v >= 400_000:
-            return "earning a very high income"
+            return "A very high annual income"
         if v >= 150_000:
-            return "earning a high income"
+            return "A high annual income"
         if v >= 70_000:
-            return "earning an above-average income"
+            return "An above-average annual income"
         if v >= 30_000:
-            return "earning a middle income"
-        return "earning a low income"
+            return "A middle annual income"
+        return "A low annual income"
 
     share_sources = {
         "wage_share": {
-            "source": "a paycheck",
-            "none": "having no income from a paycheck",
-            "loss": "losing money from work",
+            "source": "a job",
+            "none": "No income comes from a job",
+            "loss": "Work produced a loss",
         },
         "business_share": {
             "source": "a business",
-            "none": "having no business income",
-            "loss": "losing money in a business",
+            "none": "No income comes from a business",
+            "loss": "The business produced a loss",
         },
         "interest_share": {
             "source": "savings interest",
-            "none": "having no savings interest",
-            "loss": "losing money on savings",
+            "none": "No income comes from savings interest",
+            "loss": "Savings interest produced a loss",
         },
         "dividend_share": {
             "source": "investments",
-            "none": "having no dividend income",
-            "loss": "losing money on investments",
+            "none": "No income comes from dividends",
+            "loss": "Investments produced a loss",
         },
         "retirement_share": {
-            "source": "a pension",
-            "none": "having no retirement income",
-            "loss": "losing money in a retirement account",
+            "source": "retirement accounts",
+            "none": "No income comes from retirement accounts",
+            "loss": "Retirement accounts produced a loss",
         },
         "socsec_share": {
-            "source": "social security",
-            "none": "having no social security income",
-            "loss": "losing social security income",
+            "source": "Social Security",
+            "none": "No income comes from Social Security",
+            "loss": "Social Security income is negative",
         },
         "rent_share": {
             "source": "rented property",
-            "none": "having no rental income",
-            "loss": "losing money on rented property",
+            "none": "No income comes from rented property",
+            "loss": "Rented property produced a loss",
         },
     }
     if feature in share_sources:
@@ -263,48 +262,60 @@ def phrase_for(feature: str, value: float) -> str:
         if v == 0:
             return wording["none"]
         if v < 0.15:
-            return f"a little income from {source}"
-        weight = "mostly" if v >= 0.6 else "partly"
-        return f"income coming {weight} from {source}"
+            return f"A small share of income comes from {source}"
+        return (
+            f"Most income comes from {source}"
+            if v >= 0.6
+            else f"Some income comes from {source}"
+        )
 
     if feature == "spouse_income_share":
         if v <= 0:
-            return "having no spouse income on the return"
+            return "No spouse income appears on the return"
         if v < 0.15:
-            return "a little of the return's income coming from a spouse"
-        weight = "mostly" if v >= 0.6 else "partly"
-        return f"the return's income coming {weight} from a spouse"
+            return "A small share of the income comes from a spouse"
+        return (
+            "Most income comes from a spouse"
+            if v >= 0.6
+            else "Some income comes from a spouse"
+        )
 
     if feature in {"filestat", "filing_status"}:
         code = int(v)
         if code in (1, 2, 3):
-            return "filing jointly with a spouse"
+            return "The return is filed jointly with a spouse"
         if code == 4:
-            return "filing as head of household"
-        return "filing alone"
+            return "The return uses head-of-household filing"
+        return "The return is filed by a single filer"
 
     if feature == "marst":
-        return "being married" if int(v) == 1 else ""
+        return "The filer is married and living with a spouse" if int(v) == 1 else ""
 
     if feature == "nchild":
         n = int(v)
         if n == 0:
-            return "having no children at home"
-        words = {1: "one", 2: "two", 3: "three", 4: "four", 5: "five"}
-        return f"having {words.get(n, str(n))} {_plural(n, 'child', 'children')} at home"
+            return "No children live at home"
+        return (
+            f"{in_words(n).capitalize()} "
+            f"{_plural(n, 'child lives', 'children live')} at home"
+        )
 
     if feature == "nchlt5":
         n = int(v)
         if n == 0:
             return ""
-        return f"having {_plural(n, 'a child', 'children')} under five"
+        return (
+            "One child is under five"
+            if n == 1
+            else f"{in_words(n).capitalize()} children are under five"
+        )
 
     if feature == "famsize":
         n = int(v)
-        return "" if n <= 2 else f"supporting a household of {n}"
+        return "" if n <= 2 else f"The household has {n} people"
 
     if feature == "age":
-        return "being 65 or older" if int(v) >= 65 else ""
+        return "The filer is 65 or older" if int(v) >= 65 else ""
 
     if feature == "statefip":
         return ""  # federal rates do not vary by state; saying so would mislead

@@ -1,4 +1,4 @@
-# Tax burden equity analyzer — Phase 7 (the demo)
+# Tax burden equity analyzer — Path C website and Streamlit fallback
 
 Progress and summary for the team. Covers what was built, why it is shaped the
 way it is, what is verified, and what remains. Written for someone picking this
@@ -6,7 +6,115 @@ up cold.
 
 ---
 
-## What this is
+## Current application — Path C
+
+**Updated 27 July 2026.** The primary experience is now a real Next.js website,
+not the Streamlit page shell. FastAPI wraps the existing model boundary, and
+the Streamlit hybrid remains available as a fallback.
+
+```text
+Next.js website ──HTTP──> FastAPI ──public calls──> model_interface.py
+                                                ├── frozen train data
+                                                ├── model metrics/checksum
+Streamlit fallback ──────────────────────────────└── local model artifact
+```
+
+The boundary is strict:
+
+- `frontend/` owns the semantic profile form, themes, motion, page sequencing,
+  and the percentile, contribution, and twin visualisations.
+- `backend/` validates reader-facing requests, calls the public operations in
+  `model_interface.py`, and returns display-safe JSON. It does not reconstruct
+  a model feature row or calculate a prediction itself.
+- `model_interface.py` remains the sole authority for the 16-feature tax-unit
+  order, dtypes and encodings, spouse-residual logic, artifact validation,
+  prediction distribution, SHAP collapse/add-back, and twin interventions.
+- `app.py` and the committed Streamlit component builds were not removed or
+  rewritten.
+
+### Website state
+
+- Dark mode is the default; the light theme is equally tokenised.
+- The cinematic hero, fixed navigation, full-width chapter surfaces, restrained
+  scroll reveals, and dense numeric cards live in the Next.js shell.
+- The form opens with four familiar input groups. “Add more detail” reveals the
+  seven income sources, household fields, and conditional spouse income. When
+  it stays closed, the complete tax-unit profile uses an explicit all-wage,
+  no-children, smallest-valid-household default; those values still pass
+  through the ordinary 16-feature construction without approximation.
+- Result numbers use the site’s Source Sans Pro rather than terminal-style
+  monospace figures. Precision, U+2212 minus signs, and matching decimal places
+  within each comparison remain unchanged.
+- The API exposes health, prediction, percentile, contribution, and twin
+  operations. Model-unavailable responses are path-free `503` messages;
+  invalid profiles are path-free `422` messages.
+- The model artifact may be local or downloaded once at API startup. Downloads
+  are streamed to a partial file, verified against the metrics SHA-256, and
+  atomically promoted. Configure `TAX_MODEL_DOWNLOAD_URL` and optionally
+  `TAX_MODEL_DOWNLOAD_TOKEN` or `GITHUB_TOKEN`.
+- Production artifact delivery is still the deploy blocker. A GitHub Release
+  asset downloaded at startup with checksum verification is the preferred
+  direction; no release asset or production backend host has been created yet.
+
+### Verification completed
+
+- `34` Python tests pass, including the real boundary/schema guards and API
+  error/response/artifact cases.
+- Frontend type checking, linting, and a production Next.js build pass.
+- Live-model checks cover ordinary, high-income, low-income, and negative-rate
+  profiles. A tested low-income household returns `−47.9%` without clipping or
+  error styling.
+- Dark and light themes, desktop and mobile layouts, mobile navigation, form
+  submission, all three visualisations, extreme markers, and negative twin
+  results were exercised in a browser.
+- The two legacy `components/*/build/` directories remain tracked and are not
+  ignored, so the Streamlit fallback is still deployable.
+
+### Current local runbook
+
+Generate the ignored artifact only if `models/rf_eff_rate.joblib` is absent:
+
+```bash
+source .venv/bin/activate
+MPLBACKEND=Agg jupyter nbconvert \
+  --to notebook \
+  --execute notebooks/train_random_forest.ipynb \
+  --output train_random_forest.executed.ipynb \
+  --output-dir /tmp \
+  --ExecutePreprocessor.timeout=-1
+```
+
+Then run the API:
+
+```bash
+source .venv/bin/activate
+python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000
+```
+
+Run the website from a second terminal:
+
+```bash
+cd frontend
+npm ci
+cp .env.example .env.local
+npm run dev
+```
+
+Open `http://localhost:3000`. A working service shows
+`{"status":"ready","model":"local"}` at `http://localhost:8000/healthz` and the
+website replaces its invitation to analyse with four populated result
+chapters. A broken artifact/API state leaves the site shell usable but displays
+the service's unavailable message when the form is submitted.
+
+---
+
+## Streamlit fallback history
+
+Everything below documents the Phase 7 hybrid as a retained fallback. It
+explains decisions still embodied in the shared design tokens and model
+boundary, but it is no longer the primary page architecture.
+
+### What the fallback is
 
 A Streamlit web page where a reader describes a tax filer and sees four things:
 the filer's predicted effective federal tax rate, where that rate sits among
@@ -19,7 +127,7 @@ This is **Phase 7** of the project's build sequence (README §9). The interface
 was built ahead of the model and is now wired to the completed Phase 3 Random
 Forest.
 
-## Model state (important)
+### Model state (important)
 
 **The model is live; the artifact is local-only.** `model_interface.py` loads
 and validates the trained Random Forest, predicts rates, recomputes the
@@ -42,7 +150,7 @@ presentation module knows the model schema.
 
 ---
 
-## Architecture: a hybrid, and the boundary that defines it
+### Architecture: a hybrid, and the boundary that defines it
 
 Stock Streamlit could not carry the three visualisations at the quality the
 argument needs. A full React frontend would throw away Streamlit's form,
