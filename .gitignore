@@ -1,8 +1,21 @@
+# OS
+.DS_Store
+
+# Python
 __pycache__/
 *.py[cod]
 .venv/
 venv/
-.DS_Store
+
+# Trained model artifacts — large binaries, rebuilt from the recipe:
+# notebooks/train_random_forest.ipynb + frozen train.csv + models/rf_metrics.json
+models/*.joblib
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# IDE
+.idea/
 
 # Component sources build to components/*/build, and those builds ARE
 # committed: Streamlit Community Cloud installs Python requirements only and
