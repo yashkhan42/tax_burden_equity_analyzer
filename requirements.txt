@@ -1,12 +1,22 @@
-# Streamlit demo (README §7) — UI dependencies only.
-#
-# Deliberately does NOT pin scikit-learn or shap. The demo never imports them:
-# every model call goes through model_interface.py. When the Phase 3 model
-# artifact lands, the modeling dependencies get added HERE and imported THERE,
-# and no Streamlit module changes.
-
-# Verified together on CPython 3.14 (macOS). altair < 6 does not import on
-# 3.14, and streamlit < 1.60 pins altair < 6, so these three move as a set.
+# Streamlit demo runtime. Modeling dependencies are added when the Phase 3
+# artifact is wired through model_interface.py.
 streamlit==1.60.0
 pandas==2.3.3
 altair==6.2.2
+
+# Data and notebook support merged from main.
+certifi==2026.6.17
+charset-normalizer==3.4.7
+et_xmlfile==2.0.0
+idna==3.18
+numpy==2.5.0
+openpyxl==3.1.5
+packaging==26.2
+pyarrow==25.0.0
+python-dateutil==2.9.0.post0
+PyYAML==6.0.3
+requests==2.34.2
+six==1.17.0
+tzdata==2026.2
+urllib3==2.7.0
+xlrd==2.0.2
