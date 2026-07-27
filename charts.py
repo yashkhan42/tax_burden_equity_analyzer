@@ -151,9 +151,9 @@ def headline_number(rate: float, theme_type: str | None) -> alt.Chart:
 _ZERO_HALF = 0.6
 
 #: Clear space on each side of that column. This is the whole reason the
-#: chapter works: about one filer in twelve owes precisely nothing, and merging
-#: that spike into the bin beside it hides a real finding inside an ordinary
-#: bar. The gap is what makes it a separate fact rather than a tall bar.
+#: chapter works: exactly zero is a distinct outcome, and merging its point
+#: mass into the bin beside it hides that fact inside an ordinary bar. The gap
+#: makes it separate even when its recomputed model-prediction share is small.
 _ZERO_GAP = 0.35
 
 _ZERO_EDGE = _ZERO_HALF + _ZERO_GAP
@@ -192,7 +192,7 @@ def distribution(rate: float, theme_type: str | None) -> alt.LayerChart:
     """The whole country as a shape, with one line for the reader.
 
     Deliberately not a bell and deliberately not a smoothed density. The real
-    distribution has a long negative tail, a hard spike at exactly nothing, and
+    distribution has a long negative tail, a point mass at exactly nothing, and
     a short right tail; a smoother renders the spike as a bump with width,
     which is a lie about a point mass. Fixed bins are the honest primitive.
 

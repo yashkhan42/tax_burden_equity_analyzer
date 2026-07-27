@@ -10,7 +10,7 @@ Three rules this file follows without exception.
 
 **Form first, results after.** Nothing is worked out until the reader has
 described someone and asked for the rate. After that first ask, the page is
-live: changing anything in the panel updates it in place, with no second
+live: changing anything in the tool updates it in place, with no second
 button press, because a reader who has already committed once should not have
 to keep committing.
 
@@ -28,6 +28,7 @@ import streamlit as st
 
 import charts
 import model_interface as mi
+import page_style
 import viz
 from codebook import (
     FILESTAT_LABELS,
@@ -50,8 +51,8 @@ from codebook import (
 
 st.set_page_config(
     page_title="Where the tax falls",
-    layout="centered",
-    initial_sidebar_state="expanded",
+    layout="wide",
+    initial_sidebar_state="collapsed",
 )
 
 # ---------------------------------------------------------------------------
@@ -141,10 +142,12 @@ def dominant_income_phrase(filer: dict) -> str:
     anything, the honest answer is that there is no answer — the same rule the
     frozen data uses, read from there rather than restated here.
     """
-    if int(filer["inctot"]) < mi.INCTOT_SHARE_FLOOR:
+    if float(filer["unit_inctot"]) < mi.INCTOT_SHARE_FLOOR:
         return "too little income to say"
     amounts = {source: float(filer[source]) for source in mi.SHARE_SOURCE.values()}
     largest = max(amounts, key=lambda source: amounts[source])
+    if float(filer["spouse_income"]) > amounts[largest]:
+        return "mostly from a spouse's income"
     if amounts[largest] <= 0:
         return "too little income to say"
     return f"mostly from {INCOME_SOURCE_PHRASES[largest]}"
@@ -189,137 +192,286 @@ def twin_labels_for(key: tuple, change: str) -> tuple[str, str]:
 
 
 # ===========================================================================
-# The panel: everything about this filer
+# The page opening: website first, tool second
 # ===========================================================================
 
-with st.sidebar:
-    st.subheader("The filer")
-    st.caption("Describe someone, then ask for their rate.")
+st.html(page_style.site_header(theme_type()))
+hero_copy, hero_argument = st.columns(2, gap="large", vertical_alignment="top")
+with hero_copy:
+    st.html(page_style.hero_copy(theme_type()))
+with hero_argument:
+    st.html(page_style.hero_argument(theme_type()))
 
-    total_income = st.number_input(
-        "Total income before tax",
-        min_value=mi.INCTOT_RANGE[0],
-        max_value=mi.INCTOT_RANGE[1],
-        value=64_000,
-        step=1_000,
-        help="Everything they earned in a year, before any tax is taken out.",
-    )
-
-    st.markdown("**Where the money comes from**")
-    st.caption("What kind of income it is matters as much as how much there is.")
-    amounts = {
-        "incwage": st.number_input(
-            INCOME_COMPONENT_LABELS["incwage"], min_value=0, value=58_000, step=1_000
-        ),
-        "incdivid": st.number_input(
-            INCOME_COMPONENT_LABELS["incdivid"], min_value=0, value=5_000, step=1_000
-        ),
-    }
-    with st.expander("Other kinds of income"):
-        amounts["incbus"] = st.number_input(
-            INCOME_COMPONENT_LABELS["incbus"],
-            min_value=-500_000,
-            value=0,
-            step=1_000,
-            help="A loss is allowed here — put in a negative number.",
-        )
-        amounts["incint"] = st.number_input(
-            INCOME_COMPONENT_LABELS["incint"], min_value=0, value=1_000, step=500
-        )
-        amounts["incretir"] = st.number_input(
-            INCOME_COMPONENT_LABELS["incretir"], min_value=0, value=0, step=1_000
-        )
-        amounts["incss"] = st.number_input(
-            INCOME_COMPONENT_LABELS["incss"], min_value=0, value=0, step=1_000
-        )
-        amounts["incrent"] = st.number_input(
-            INCOME_COMPONENT_LABELS["incrent"],
-            min_value=-500_000,
-            value=0,
-            step=1_000,
-            help="A loss is allowed here — put in a negative number.",
-        )
-
-    st.markdown("**The household**")
-    age = st.number_input(
-        "Age", min_value=mi.AGE_RANGE[0], max_value=mi.AGE_RANGE[1], value=42
-    )
-    marital_status = st.selectbox(
-        "Marital status",
-        options=mi.MARST_LEVELS,
-        index=mi.MARST_LEVELS.index(6),
-        format_func=lambda code: MARST_LABELS[code],
-    )
-
-    married = marital_status == mi.MARRIED_SPOUSE_PRESENT
-    spouse_older = False
-    filing_alone_choice = 5
-    if married:
-        spouse_older = st.checkbox("Their spouse is 65 or older")
-    children = st.number_input(
-        "Children living at home", min_value=0, max_value=mi.NCHILD_MAX, value=0
-    )
-    under_five = st.number_input(
-        "How many of them are under five",
-        min_value=0,
-        max_value=min(mi.NCHLT5_MAX, int(children)),
-        value=0,
-        disabled=children == 0,
-    )
-    household_floor = int(children) + 1
-    household_size = st.number_input(
-        "People in the household",
-        min_value=max(mi.FAMSIZE_RANGE[0], household_floor),
-        max_value=mi.FAMSIZE_RANGE[1],
-        value=household_floor + (1 if married else 0),
-    )
-
-    if not married:
-        filing_alone_choice = st.radio(
-            "How they file",
-            options=[4, 5],
-            index=0 if children > 0 else 1,
-            format_func=lambda code: FILING_CHOICE_LABELS[code],
-            help=(
-                "Someone unmarried with children can usually file as head of "
-                "household, which is taxed more gently. Not everyone who could "
-                "does — in the survey, about six in ten do."
+if mi.MODEL_IS_STUB:
+    st.html(
+        page_style.notice(
+            theme_type(),
+            "Everything below is a stand-in.",
+            (
+                "The part of this project that learns from the survey is still "
+                "being built, so these figures test the experience rather than "
+                "report a result."
             ),
         )
-
-    state = st.selectbox(
-        "State",
-        options=sorted(mi.STATEFIP_LEVELS, key=lambda code: STATE_NAMES[code]),
-        index=sorted(mi.STATEFIP_LEVELS, key=lambda code: STATE_NAMES[code]).index(36),
-        format_func=lambda code: STATE_NAMES[code],
-        help="Federal tax is the same everywhere; this is here for context.",
     )
 
-    if st.button("Show the rate", type="primary"):
+
+# ===========================================================================
+# The tool: everything about this return
+# ===========================================================================
+
+st.html(
+    page_style.section_heading(
+        theme_type(),
+        "The tool",
+        "Build a comparison",
+        anchor="build-a-comparison",
+        lead=(
+            "Start with the whole return, then describe where the non-spouse "
+            "income comes from and who lives in the household."
+        ),
+    )
+)
+
+with st.container(border=True):
+    st.html(
+        page_style.form_group(
+            theme_type(),
+            "The return",
+            "Annual amounts before federal tax. Use the same year for every field.",
+        )
+    )
+    income_col, relationship_col, filing_col = st.columns(
+        3, gap="large", vertical_alignment="bottom"
+    )
+    with income_col:
+        total_income = st.number_input(
+            "Total income on the return",
+            min_value=int(mi.UNIT_INCTOT_RANGE[0]),
+            max_value=int(mi.UNIT_INCTOT_RANGE[1]),
+            value=64_000,
+            step=1_000,
+            help=(
+                "Income for everyone represented on the return, including a "
+                "spouse and any dependents claimed."
+            ),
+            key="unit_income",
+        )
+    with relationship_col:
+        marital_status = st.selectbox(
+            "Marital status",
+            options=mi.MARST_LEVELS,
+            index=mi.MARST_LEVELS.index(6),
+            format_func=lambda code: MARST_LABELS[code],
+            key="marital_status",
+        )
+
+    married = marital_status == mi.MARRIED_SPOUSE_PRESENT
+    filing_alone_choice = 5
+    if married:
+        with filing_col:
+            spouse_income = st.number_input(
+                "Spouse's total income",
+                min_value=0,
+                value=0,
+                step=1_000,
+                help=(
+                    "Enter the spouse's whole annual income here. Leave it out "
+                    "of the source amounts below."
+                ),
+                key="spouse_income",
+            )
+        filing_status = mi.derive_filing_status(int(marital_status))
+        st.caption(
+            "Married couples living together are represented as filing "
+            "together, matching the ordinary combinations in the survey."
+        )
+    else:
+        spouse_income = 0
+        with filing_col:
+            filing_alone_choice = st.radio(
+                "How they file",
+                options=[4, 5],
+                index=1,
+                format_func=lambda code: FILING_CHOICE_LABELS[code],
+                help=(
+                    "A person supporting children or another qualifying "
+                    "relative may be able to file as head of household."
+                ),
+                key="filing_choice",
+            )
+        filing_status = mi.derive_filing_status(
+            int(marital_status),
+            head_of_household=filing_alone_choice == 4,
+        )
+
+    space(BLOCK_GAP)
+    st.html(
+        page_style.form_group(
+            theme_type(),
+            "Where the non-spouse income comes from",
+            (
+                "Enter these amounts for the person described here and any "
+                "dependents they claim. Leave out their spouse's income."
+            ),
+        )
+    )
+    source_row_one = st.columns(4, gap="large", vertical_alignment="bottom")
+    with source_row_one[0]:
+        wage_income = st.number_input(
+            INCOME_COMPONENT_LABELS["incwage"].capitalize(),
+            min_value=0,
+            value=58_000,
+            step=1_000,
+            key="income_wage",
+        )
+    with source_row_one[1]:
+        business_income = st.number_input(
+            INCOME_COMPONENT_LABELS["incbus"].capitalize(),
+            min_value=-500_000,
+            value=0,
+            step=1_000,
+            help="A business loss belongs here as a negative amount.",
+            key="income_business",
+        )
+    with source_row_one[2]:
+        interest_income = st.number_input(
+            INCOME_COMPONENT_LABELS["incint"].capitalize(),
+            min_value=0,
+            value=1_000,
+            step=500,
+            key="income_interest",
+        )
+    with source_row_one[3]:
+        dividend_income = st.number_input(
+            INCOME_COMPONENT_LABELS["incdivid"].capitalize(),
+            min_value=0,
+            value=5_000,
+            step=1_000,
+            key="income_dividend",
+        )
+
+    source_row_two = st.columns(4, gap="large", vertical_alignment="bottom")
+    with source_row_two[0]:
+        retirement_income = st.number_input(
+            INCOME_COMPONENT_LABELS["incretir"].capitalize(),
+            min_value=0,
+            value=0,
+            step=1_000,
+            key="income_retirement",
+        )
+    with source_row_two[1]:
+        social_security_income = st.number_input(
+            INCOME_COMPONENT_LABELS["incss"].capitalize(),
+            min_value=0,
+            value=0,
+            step=1_000,
+            key="income_social_security",
+        )
+    with source_row_two[2]:
+        rent_income = st.number_input(
+            INCOME_COMPONENT_LABELS["incrent"].capitalize(),
+            min_value=-500_000,
+            value=0,
+            step=1_000,
+            help="A rental loss belongs here as a negative amount.",
+            key="income_rent",
+        )
+    with source_row_two[3]:
+        st.caption(
+            "These amounts do not have to add up exactly to the return total. "
+            "Losses and income outside these groups can leave a difference."
+        )
+
+    space(BLOCK_GAP)
+    st.html(
+        page_style.form_group(
+            theme_type(),
+            "The household",
+            "Use the household as it stood during the year represented above.",
+        )
+    )
+    household_fields = st.columns(5, gap="large", vertical_alignment="bottom")
+    with household_fields[0]:
+        age = st.number_input(
+            "Age",
+            min_value=mi.AGE_RANGE[0],
+            max_value=mi.AGE_RANGE[1],
+            value=42,
+            key="age",
+        )
+    with household_fields[1]:
+        children = st.number_input(
+            "Own children at home",
+            min_value=0,
+            max_value=mi.NCHILD_MAX,
+            value=0,
+            key="children",
+        )
+
+    under_five_max = min(mi.NCHLT5_MAX, int(children))
+    if "under_five" not in st.session_state:
+        st.session_state["under_five"] = 0
+    elif st.session_state["under_five"] > under_five_max:
+        st.session_state["under_five"] = under_five_max
+    with household_fields[2]:
+        under_five = st.number_input(
+            "How many are under five",
+            min_value=0,
+            max_value=under_five_max,
+            disabled=children == 0,
+            key="under_five",
+        )
+
+    household_floor = int(children) + 1 + (1 if married else 0)
+    household_minimum = max(mi.FAMSIZE_RANGE[0], household_floor)
+    if "household_size" not in st.session_state:
+        st.session_state["household_size"] = household_minimum
+    elif st.session_state["household_size"] < household_minimum:
+        st.session_state["household_size"] = household_minimum
+    with household_fields[3]:
+        household_size = st.number_input(
+            "People in the household",
+            min_value=household_minimum,
+            max_value=mi.FAMSIZE_RANGE[1],
+            key="household_size",
+        )
+
+    states_by_name = sorted(mi.STATEFIP_LEVELS, key=lambda code: STATE_NAMES[code])
+    with household_fields[4]:
+        state = st.selectbox(
+            "State",
+            options=states_by_name,
+            index=states_by_name.index(36),
+            format_func=lambda code: STATE_NAMES[code],
+            help="Federal tax is the same everywhere; this is included for context.",
+            key="state",
+        )
+
+    space(BLOCK_GAP)
+    if st.button("Show the rate", type="primary", width="stretch"):
         st.session_state["asked"] = True
 
 filer = {
-    "inctot": int(total_income),
-    "incwage": int(amounts["incwage"]),
-    "incbus": int(amounts["incbus"]),
-    "incint": int(amounts["incint"]),
-    "incdivid": int(amounts["incdivid"]),
-    "incretir": int(amounts["incretir"]),
-    "incss": int(amounts["incss"]),
-    "incrent": int(amounts["incrent"]),
+    "unit_inctot": float(total_income),
+    "spouse_income": float(spouse_income),
+    "incwage": float(wage_income),
+    "incbus": float(business_income),
+    "incint": float(interest_income),
+    "incdivid": float(dividend_income),
+    "incretir": float(retirement_income),
+    "incss": float(social_security_income),
+    "incrent": float(rent_income),
     "age": int(age),
     "nchild": int(children),
     "nchlt5": int(under_five),
     "famsize": int(household_size),
+    "filing_status": int(filing_status),
     "marst": int(marital_status),
     "statefip": int(state),
-    "filestat": mi.derive_filestat(
-        int(marital_status),
-        int(age),
-        spouse_65_plus=spouse_older,
-        head_of_household=filing_alone_choice == 4,
-    ),
 }
+
+st.html(page_style.reading_key(theme_type()))
 
 
 # ===========================================================================
@@ -342,13 +494,13 @@ def shared_attributes(filer: dict, change: str) -> list[dict]:
     would be false on its face.
     """
     values = {
-        "income": f"roughly {money(filer['inctot'])} a year",
+        "income": f"roughly {money(filer['unit_inctot'])} a year",
         "source": dominant_income_phrase(filer),
         "age": age_phrase(filer["age"]),
         "children": children_phrase(filer["nchild"], filer["nchlt5"]),
         "household": household_phrase(filer["famsize"]),
         "marital": MARST_LABELS[filer["marst"]],
-        "filing": FILESTAT_LABELS[filer["filestat"]],
+        "filing": FILESTAT_LABELS[filer["filing_status"]],
         "state": STATE_NAMES[filer["statefip"]],
     }
     moved = set(SHARED_ATTRIBUTES_MOVED_BY[change])
@@ -363,26 +515,33 @@ def twin_props(filer: dict, change: str) -> dict:
     """Everything the twin comparison needs, already written and rounded."""
     base_rate, twin_rate, gap = twin_for(_key(filer), change)
     from_label, to_label = twin_labels_for(_key(filer), change)
-    gap_points = round(gap, 1)
+    displayed_base = round(base_rate, 1)
+    displayed_twin = round(twin_rate, 1)
+    # The printed gap must be the arithmetic a reader can do from the two
+    # printed rates, even when their unrounded values straddle rounding bins.
+    gap_points = round(displayed_twin - displayed_base, 1)
 
     # Money is only translated when it would not mislead. A gap that rounds to
     # nothing translates to a dollar figure that is pure noise, and an income
     # too small to take a share of translates to nothing meaningful at all.
     gap_money = None
-    if abs(gap_points) >= 0.1 and int(filer["inctot"]) >= mi.INCTOT_SHARE_FLOOR:
-        annual = abs(gap) / 100 * int(filer["inctot"])
+    if (
+        abs(gap_points) >= 0.1
+        and float(filer["unit_inctot"]) >= mi.INCTOT_SHARE_FLOOR
+    ):
+        annual = abs(gap) / 100 * float(filer["unit_inctot"])
         gap_money = f"About {money(annual)} a year at this income."
 
     return {
         "changed": TWIN_FLIP_LABELS[change],
         "a": {
             "label": from_label,
-            "rate": round(base_rate, 1),
+            "rate": displayed_base,
             "display": charts.fmt_rate(base_rate),
         },
         "b": {
             "label": to_label,
-            "rate": round(twin_rate, 1),
+            "rate": displayed_twin,
             "display": charts.fmt_rate(twin_rate),
         },
         "shared": shared_attributes(filer, change),
@@ -427,39 +586,19 @@ def reason_props(explanation) -> dict:
 
 
 # ===========================================================================
-# The page
+# The four result chapters
 # ===========================================================================
-
-st.title("Two filers, same income, different tax")
-st.markdown(
-    "The tax system treats a paycheck, a dividend and a pension differently, "
-    "and treats households differently again. This page shows what that adds "
-    "up to for one filer — and what changes when a single thing about them "
-    "changes."
-)
-
-if mi.MODEL_IS_STUB:
-    space(BLOCK_GAP)
-    with st.container(border=True):
-        st.markdown(
-            "**Everything below is a stand-in.** The part of this project that "
-            "learns from the survey is still being built, so the figures on "
-            "this page are placeholders used to test the design. Nothing here "
-            "is a result yet."
-        )
 
 
 def chapter(number: str, title: str) -> None:
-    """A chapter marker: the widest silence on the page, then two words."""
-    space(CHAPTER_GAP)
-    st.caption(f"{number} — {title}")
+    """Open one scroll chapter with the design system's full 96 px rhythm."""
+    st.html(page_style.section_heading(theme_type(), number, title.capitalize()))
 
 
 def opening() -> None:
     """Before anything has been asked for. Never a blank page."""
-    space(CHAPTER_GAP)
     st.markdown(
-        "Describe someone in the panel on the left, then choose **Show the "
+        "Describe a return above, then choose **Show the "
         "rate**. You will get what they pay, where that sits among everyone "
         "else, what moved it, and what happens when one thing about them "
         "changes."
@@ -475,31 +614,33 @@ def opening() -> None:
 
 def chapter_one(rate: float) -> None:
     chapter("01", "what they pay")
-    st.altair_chart(
-        charts.headline_number(rate, theme_type()), theme=None, width="stretch"
-    )
-    space(FIGURE_GAP)
+    figure, reading = st.columns(2, gap="large", vertical_alignment="center")
+    with figure:
+        st.altair_chart(
+            charts.headline_number(rate, theme_type()), theme=None, width="stretch"
+        )
+    with reading:
+        if rate >= 0:
+            st.markdown(
+                f"A filer like this pays about **{abs(rate):.1f} percent** of "
+                "their income in federal income tax."
+            )
+        else:
+            st.markdown(
+                f"A filer like this ends the year **{abs(rate):.1f} percent of "
+                "their income ahead** — they get back more than they pay in."
+            )
+            space(BLOCK_GAP)
+            st.markdown(
+                "A rate below zero is not a mistake and not an edge case. "
+                "Credits meant to support low-paid work and children can come "
+                "to more than the tax owed, and the difference is paid out. "
+                f"About {round(mi.SHARE_NEGATIVE * 100)} in every hundred "
+                "predicted rates fall below zero."
+            )
 
-    if rate >= 0:
-        st.markdown(
-            f"A filer like this pays about **{abs(rate):.1f} percent** of their "
-            "income in federal income tax."
-        )
-    else:
-        st.markdown(
-            f"A filer like this ends the year **{abs(rate):.1f} percent of their "
-            "income ahead** — they get back more than they pay in."
-        )
-        space(BLOCK_GAP)
-        st.markdown(
-            "A rate below zero is not a mistake and not an edge case. Credits "
-            "meant to support low-paid work and children can come to more than "
-            "the tax owed, and the difference is paid out. About twelve in "
-            "every hundred filers end the year this way."
-        )
-
-    space(FIGURE_GAP)
-    st.caption(FRAMING)
+        space(FIGURE_GAP)
+        st.caption(FRAMING)
 
 
 # ---------------------------------------------------------------------------
@@ -509,36 +650,44 @@ def chapter_one(rate: float) -> None:
 
 def chapter_two(rate: float) -> None:
     chapter("02", "where it sits")
-    st.altair_chart(
-        charts.distribution(rate, theme_type()), theme=None, width="stretch"
-    )
-    space(FIGURE_GAP)
+    figure, reading = st.columns(2, gap="large", vertical_alignment="center")
+    with figure:
+        st.altair_chart(
+            charts.distribution(rate, theme_type()), theme=None, width="stretch"
+        )
+    with reading:
+        below = round(standing_for(rate))
+        zero_share = mi.SHARE_EXACTLY_ZERO * 100
+        zero_words = (
+            "fewer than one in every 100"
+            if zero_share < 0.5
+            else f"about {round(zero_share)} in every 100"
+        )
+        if below >= 99:
+            st.markdown(
+                "Out of every 100 filers, fewer than one pays a larger share of "
+                "their income than this."
+            )
+        elif below <= 1:
+            st.markdown(
+                "Out of every 100 filers, fewer than one pays a smaller share "
+                "of their income than this."
+            )
+        else:
+            st.markdown(
+                f"Out of every 100 filers, about **{below}** pay a smaller "
+                f"share of their income than this, and about **{100 - below}** "
+                "pay more."
+            )
 
-    below = round(standing_for(rate))
-    if below >= 99:
-        st.markdown(
-            "Out of every 100 filers, fewer than one pays a larger share of "
-            "their income than this."
+        space(FIGURE_GAP)
+        st.caption(
+            "The shape behind the line is the whole country. The column "
+            "standing on its own is the filers who owe precisely nothing — "
+            f"{zero_words}. Everyone in the shaded band to its left, about "
+            f"{mi.SHARE_NEGATIVE * 100:.0f} in every 100, got back more than "
+            "they paid."
         )
-    elif below <= 1:
-        st.markdown(
-            "Out of every 100 filers, fewer than one pays a smaller share of "
-            "their income than this."
-        )
-    else:
-        st.markdown(
-            f"Out of every 100 filers, about **{below}** pay a smaller share of "
-            f"their income than this, and about **{100 - below}** pay more."
-        )
-
-    space(FIGURE_GAP)
-    st.caption(
-        "The shape behind the line is the whole country. The column standing on "
-        "its own is the filers who owe precisely nothing — about "
-        f"{mi.SHARE_EXACTLY_ZERO * 100:.0f} in every 100. Everyone in the shaded "
-        f"band to its left, about {mi.SHARE_NEGATIVE * 100:.0f} in every 100, got "
-        "back more than they paid."
-    )
 
 
 # ---------------------------------------------------------------------------
@@ -595,36 +744,39 @@ def reasons_in_words(props: dict) -> None:
 def chapter_three(explanation) -> None:
     chapter("03", "what moved it")
     props = reason_props(explanation)
+    reading, figure = st.columns(2, gap="large", vertical_alignment="top")
 
-    if props["nothingStandsOut"]:
-        st.markdown(
-            "Nothing about this filer stands out. Their rate is close to what "
-            "the typical filer pays, and no single thing moved it far."
-        )
-    else:
-        count = len(props["reasons"])
-        verb = "accounts" if count == 1 else "account"
-        st.markdown(
-            f"{in_words(count).capitalize()} "
-            f"{'thing' if count == 1 else 'things'} {verb} for most of the "
-            "distance between this filer and a typical one, and the largest of "
-            f"them is {props['reasons'][0]['text']}."
-        )
-    space(FIGURE_GAP)
+    with reading:
+        if props["nothingStandsOut"]:
+            st.markdown(
+                "Nothing about this filer stands out. Their rate is close to "
+                "what the typical filer pays, and no single thing moved it far."
+            )
+        else:
+            count = len(props["reasons"])
+            verb = "accounts" if count == 1 else "account"
+            st.markdown(
+                f"{in_words(count).capitalize()} "
+                f"{'thing' if count == 1 else 'things'} {verb} for most of the "
+                "distance between this filer and a typical one, and the largest "
+                f"of them is {props['reasons'][0]['text']}."
+            )
 
-    if not viz.render("contribution", mode=theme_type(), key="reasons", **props):
-        reasons_in_words(props)
+    with figure:
+        if not viz.render(
+            "contribution", mode=theme_type(), key="reasons", **props
+        ):
+            reasons_in_words(props)
 
-    if props["nothingStandsOut"]:
-        return
-
-    space(FIGURE_GAP)
-    st.caption(
-        "Each figure is how far one thing moved the rate, starting from the "
-        f"{charts.fmt_rate(props['baseline'])} of income a typical filer pays. "
-        "They are listed one at a time for readability; in reality they lean on "
-        "each other, which is why the list closes with everything that is left."
-    )
+        if not props["nothingStandsOut"]:
+            space(FIGURE_GAP)
+            st.caption(
+                "Each figure is how far one thing moved the rate, starting "
+                f"from the {charts.fmt_rate(props['baseline'])} of income a "
+                "typical filer pays. They are listed one at a time for "
+                "readability; in reality they lean on each other, which is why "
+                "the list closes with everything that is left."
+            )
 
 
 # ---------------------------------------------------------------------------
@@ -680,25 +832,37 @@ def twin_in_words(props: dict) -> None:
 
 def chapter_four(filer: dict) -> None:
     chapter("04", "the same filer, one thing changed")
-    st.markdown(
-        "Everything about this filer stays exactly as it is except one thing. "
-        "The distance between the two is what that one thing is worth. This is "
-        "one comparison, not a finding about the country."
-    )
-    space(FIGURE_GAP)
+    reading, figure = st.columns(2, gap="large", vertical_alignment="top")
 
-    change = st.selectbox(
-        "Change one thing",
-        options=mi.TWIN_FLIP_ATTRIBUTES,
-        format_func=lambda name: TWIN_FLIP_QUESTIONS[name],
-        key="change_one_thing",
-        label_visibility="collapsed",
-    )
-    space(FIGURE_GAP)
+    def question_for(change: str) -> str:
+        if (
+            change == "marital_status"
+            and int(filer["marst"]) == mi.MARRIED_SPOUSE_PRESENT
+        ):
+            return "What if they were not married?"
+        if change == "dependents" and int(filer["nchild"]) > 0:
+            return "What if there were no children at home?"
+        return TWIN_FLIP_QUESTIONS[change]
 
-    props = twin_props(filer, change)
-    if not viz.render("twin", mode=theme_type(), key="twin", **props):
-        twin_in_words(props)
+    with reading:
+        st.markdown(
+            "Everything about this filer stays exactly as it is except one "
+            "thing. The distance between the two is what that one thing is "
+            "worth. This is one comparison, not a finding about the country."
+        )
+        space(FIGURE_GAP)
+        change = st.selectbox(
+            "Change one thing",
+            options=mi.TWIN_FLIP_ATTRIBUTES,
+            format_func=question_for,
+            key="change_one_thing",
+            label_visibility="collapsed",
+        )
+
+    with figure:
+        props = twin_props(filer, change)
+        if not viz.render("twin", mode=theme_type(), key="twin", **props):
+            twin_in_words(props)
 
 
 # ---------------------------------------------------------------------------
@@ -707,19 +871,50 @@ def chapter_four(filer: dict) -> None:
 def results(filer: dict) -> None:
     try:
         rate = rate_for(_key(filer))
+        explanation = reasons_for(_key(filer))
+        chapter_one(rate)
+        chapter_two(rate)
+        chapter_three(explanation)
+        chapter_four(filer)
+    except mi.ModelArtifactUnavailable:
+        space(CHAPTER_GAP)
+        st.html(
+            page_style.notice(
+                theme_type(),
+                "The analysis is not available in this copy.",
+                (
+                    "The trained predictor has not been supplied to the app. "
+                    "The experience is ready, but it cannot produce rates until "
+                    "the project team adds the matching trained model."
+                ),
+            )
+        )
+    except mi.ModelContractError:
+        space(CHAPTER_GAP)
+        st.html(
+            page_style.notice(
+                theme_type(),
+                "The analysis was stopped.",
+                (
+                    "The trained predictor and its expected data do not match. "
+                    "No estimate is shown because a mismatched estimate could "
+                    "look convincing while being wrong."
+                ),
+            )
+        )
     except ValueError:
         space(CHAPTER_GAP)
-        st.warning(
-            "Those details do not describe anyone the survey covers, so there "
-            "is nothing to compare them against. Try adjusting the panel on "
-            "the left."
+        st.html(
+            page_style.notice(
+                theme_type(),
+                "This return falls outside the comparison.",
+                (
+                    "Those details do not describe an ordinary combination in "
+                    "the survey, so there is no responsible estimate to show. "
+                    "Adjust the return above and try again."
+                ),
+            )
         )
-        return
-
-    chapter_one(rate)
-    chapter_two(rate)
-    chapter_three(reasons_for(_key(filer)))
-    chapter_four(filer)
 
 
 if st.session_state.get("asked"):
@@ -729,30 +924,42 @@ else:
 
 
 # ===========================================================================
-# Footer
+# Method and scope
 # ===========================================================================
 
-space(CHAPTER_GAP)
-st.divider()
-st.caption(
-    "**Where this comes from** — a United States Census survey of 61,231 tax "
-    "filers, covering money earned in 2023. Rate means federal income tax, "
-    "after credits, as a share of the income counted for tax. It does not "
-    "include payroll tax, state tax or sales tax."
-)
-if mi.MODEL_IS_STUB:
-    st.caption(
-        "**What is still missing** — every figure above is a placeholder while "
-        "the part of this project that learns from the survey is built. When "
-        "that is finished, this note disappears on its own."
+st.html(
+    page_style.section_heading(
+        theme_type(),
+        "Method",
+        "What this does — and does not — claim",
+        anchor="method",
     )
-st.caption(
-    "**How it will be checked** — against the tax figures the Internal Revenue "
-    "Service publishes for 2023, income band by income band. The survey and the "
-    "tax authority are separate sources, and no number on this page ever mixes "
-    "the two."
 )
-st.caption(
-    "**Appearance** — this page opens dark. There is a light version in the "
-    "menu at the top right of the window, under settings."
-)
+source, validation, appearance = st.columns(3, gap="large", vertical_alignment="top")
+with source:
+    st.caption(
+        "**Where this comes from** — a United States Census survey of 61,231 "
+        "tax filers, covering money earned in 2023. Rate means federal income "
+        "tax, after credits, as a share of the income counted for tax. It does "
+        "not include payroll tax, state tax or sales tax."
+    )
+    if mi.MODEL_IS_STUB:
+        st.caption(
+            "**What is still missing** — every figure above is a placeholder "
+            "while the part of this project that learns from the survey is "
+            "built. When that is finished, this note disappears on its own."
+        )
+with validation:
+    st.caption(
+        "**How it will be checked** — against the tax figures the Internal "
+        "Revenue Service publishes for 2023, income band by income band. The "
+        "survey and the tax authority are separate sources, and no number on "
+        "this page ever mixes the two."
+    )
+with appearance:
+    st.caption(
+        "**Appearance** — this page opens dark. There is a fully authored "
+        "light version in the menu at the top right of the window. After "
+        "choosing Light or Dark there, choose Rerun in the same menu so the "
+        "charts and comparison panels receive the new palette too."
+    )

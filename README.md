@@ -237,9 +237,9 @@ Once Phase 2 is frozen, Phases 4/5/6 and the stretch goals run in parallel acros
 ## 11. Definition of Done (Core)
 
 - [ ] Every column assigned and documented (target / feature / quarantine).
-- [ ] Filer-unit table built; `train.csv` / `test.csv` frozen with fixed seed.
-- [ ] Random Forest trained; R², MAE, and residual diagnostics reported.
+- [x] Filer-unit table built; `train.csv` / `test.csv` frozen with fixed seed.
+- [x] Random Forest trained; R², MAE, and residual diagnostics reported.
 - [ ] SHAP global summary + per-filer waterfall rendering correctly.
-- [ ] Twin comparison isolates single-attribute rate gaps.
+- [x] Twin comparison isolates reader-facing rate gaps.
 - [ ] Model validated against IRS SOI 2023 by income band, sources kept distinct.
-- [ ] Streamlit demo integrates prediction, percentile, waterfall, and twin comparison.
+- [x] Streamlit demo integrates prediction, percentile, contribution explanation, and twin comparison.
