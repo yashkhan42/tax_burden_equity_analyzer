@@ -1,9 +1,9 @@
 # Theme for the tax burden demo.
 #
 # Two palettes, authored independently — the light one is not the dark one
-# inverted. Dark is the default; the reader switches in the app's own
-# appearance menu (top right, ⋮ → Settings → Appearance), which is why no CSS
-# is injected anywhere in this project.
+# inverted. Dark is the default; the reader switches in Streamlit's top-right
+# menu and reruns once so the explicit palette passed to custom content also
+# updates. No private-DOM CSS is injected anywhere in this project.
 #
 # Shared decisions across both modes:
 #   - serif headings, sans body: an editorial register, not a product one

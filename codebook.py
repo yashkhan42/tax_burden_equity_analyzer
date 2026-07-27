@@ -148,7 +148,7 @@ SHARED_ATTRIBUTES_MOVED_BY = {
     "filing_status": ("filing",),
     "marital_status": ("marital", "filing"),
     "dominant_income_source": ("source",),
-    "dependents": ("children",),
+    "dependents": ("children", "household"),
 }
 
 _NUMBER_WORDS = {
@@ -207,7 +207,7 @@ def phrase_for(feature: str, value: float) -> str:
     """
     v = float(value)
 
-    if feature == "inctot":
+    if feature in {"inctot", "unit_inctot"}:
         if v >= 400_000:
             return "earning a very high income"
         if v >= 150_000:
@@ -219,24 +219,63 @@ def phrase_for(feature: str, value: float) -> str:
         return "earning a low income"
 
     share_sources = {
-        "wage_share": "a paycheck",
-        "business_share": "running a business",
-        "interest_share": "savings interest",
-        "dividend_share": "investments",
-        "retirement_share": "a pension",
-        "socsec_share": "social security",
-        "rent_share": "rented property",
+        "wage_share": {
+            "source": "a paycheck",
+            "none": "having no income from a paycheck",
+            "loss": "losing money from work",
+        },
+        "business_share": {
+            "source": "a business",
+            "none": "having no business income",
+            "loss": "losing money in a business",
+        },
+        "interest_share": {
+            "source": "savings interest",
+            "none": "having no savings interest",
+            "loss": "losing money on savings",
+        },
+        "dividend_share": {
+            "source": "investments",
+            "none": "having no dividend income",
+            "loss": "losing money on investments",
+        },
+        "retirement_share": {
+            "source": "a pension",
+            "none": "having no retirement income",
+            "loss": "losing money in a retirement account",
+        },
+        "socsec_share": {
+            "source": "social security",
+            "none": "having no social security income",
+            "loss": "losing social security income",
+        },
+        "rent_share": {
+            "source": "rented property",
+            "none": "having no rental income",
+            "loss": "losing money on rented property",
+        },
     }
     if feature in share_sources:
-        source = share_sources[feature]
+        wording = share_sources[feature]
+        source = wording["source"]
         if v < 0:
-            return f"losing money on {source}"
+            return wording["loss"]
+        if v == 0:
+            return wording["none"]
         if v < 0.15:
             return f"a little income from {source}"
         weight = "mostly" if v >= 0.6 else "partly"
         return f"income coming {weight} from {source}"
 
-    if feature == "filestat":
+    if feature == "spouse_income_share":
+        if v <= 0:
+            return "having no spouse income on the return"
+        if v < 0.15:
+            return "a little of the return's income coming from a spouse"
+        weight = "mostly" if v >= 0.6 else "partly"
+        return f"the return's income coming {weight} from a spouse"
+
+    if feature in {"filestat", "filing_status"}:
         code = int(v)
         if code in (1, 2, 3):
             return "filing jointly with a spouse"

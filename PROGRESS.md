@@ -15,16 +15,30 @@ what happens to the rate when one fact about the filer changes and nothing else
 does. That last one is the equity argument: two people, same income, different
 rate, with the responsible attribute isolated.
 
-This is **Phase 7** of the project's build sequence (README §9), built ahead of
-the model so UI work does not block on modelling.
+This is **Phase 7** of the project's build sequence (README §9). The interface
+was built ahead of the model and is now wired to the completed Phase 3 Random
+Forest.
 
 ## Model state (important)
 
-**There is no trained model yet.** A teammate is training the Random Forest
-(Phase 3). Every rate, percentile, attribution and gap on the page is a
-**deterministic placeholder** produced by `model_interface.py`, and the page
-says so on screen. When the real model lands, wiring it in touches **one file**
-(`model_interface.py`) and flips one flag; no other module changes.
+**The model is live; the artifact is local-only.** `model_interface.py` loads
+and validates the trained Random Forest, predicts rates, recomputes the
+reference distribution over the frozen training set, calculates empirical
+percentiles, collapses 73 encoded SHAP values back to the 16 reader-facing
+inputs, and runs the twin interventions. `MODEL_IS_STUB` is `False`.
+
+The 275.7 MB artifact is `models/rf_eff_rate.joblib`. It is intentionally
+ignored and must be regenerated from `notebooks/train_random_forest.ipynb`
+before the app can return a result. The notebook verifies both frozen hashes,
+fits the model, writes the artifact, updates its matching checksum in
+`models/rf_metrics.json`, and redraws the Phase 3 residual diagnostic.
+
+The application/model boundary remains real: `app.py` supplies reader-answerable
+tax-unit values, and only `model_interface.py` imports modelling libraries,
+loads model bytes, constructs the ordered feature row, or interprets encoded
+outputs. The form changed because the authoritative model changed from the old
+15-feature person contract to the 16-feature tax-unit contract; no other
+presentation module knows the model schema.
 
 ---
 
@@ -73,8 +87,17 @@ Three reference conflicts were resolved here (see below).
 **Stage 3 — parallel build against the frozen system.** Twin component,
 contribution component, and the Streamlit shell + form + percentile chart.
 
-**Stage 4 — integration (in progress).** Wiring, theme-propagation verification
-across the iframe boundary in both modes, extreme-value testing, deploy check.
+**Stage 4 — integration (complete locally).** Live-model wiring, theme
+verification across the iframe boundary in both modes, negative/extreme/
+near-zero testing, conditional tax-unit form, and deploy-artifact checks.
+
+**Website pass — complete within the honest Streamlit boundary.** The sidebar
+is gone. A real hero, site navigation, integrated on-page form, asymmetric
+result chapters and three-column method close now make the shell read as a
+website rather than a centred document. True viewport-edge bands, sticky
+scroll choreography, bespoke native widgets, an in-page host-theme switch and
+removal of Streamlit chrome still require private-DOM injection or the full
+React Path C; none is faked here.
 
 ---
 
@@ -112,7 +135,7 @@ desaturated.
 |---|---|---|---|
 | **Twin** (React) | two identical cards + a gap strip with a dumbbell whose *connector* is the heaviest mark | a chart of two dots can't show that everything else was held constant — the sameness is the premise, so it's drawn twice in grey | two big numbers side by side (emotionally inert); slope chart (reads as time) |
 | **Contribution** (React) | ranked reason list with inline magnitude bars from a shared zero | the credit-report pattern readers already know, and what regulators mandate | SHAP waterfall (needs chart literacy, names features) |
-| **Percentile** (**Altair**) | fixed-bin histogram, zero drawn as its own separated column, negative region shaded | no interaction, no state, no bespoke layout — Altair does it well and every extra iframe is a cost | a smoothed density (would render the 8.5% zero point-mass as a bump with width — a lie) |
+| **Percentile** (**Altair**) | fixed-bin histogram, zero drawn as its own separated column, negative region shaded | no interaction, no state, no bespoke layout — Altair does it well and every extra iframe is a cost | a smoothed density (would give a point-mass false width) |
 
 The percentile staying Altair is a deliberate call the brief invited: custom
 rendering is spent only where it earns its keep.
@@ -120,9 +143,11 @@ rendering is spent only where it earns its keep.
 ## Degradation is designed, not patched
 
 Every component has a fixture for each hard case, each verified in both modes:
-- **Negative rates are a finding, never an error.** ~12% of real filers have one
-  (refundable credits exceed tax owed); styled identically to positives, only a
-  U+2212 marks the difference. Verified end-to-end (a −7.1% filer renders clean).
+- **Negative rates are a finding, never an error.** 11.4% of frozen observed
+  outcomes are negative; 16.1% of the live model's frozen-training predictions
+  fall below zero. The page labels the latter as predicted rates, styles them
+  identically to positives, and uses only U+2212 to mark the sign. Verified
+  end-to-end at the live prediction minimum (−48.6%).
 - **Gap crossing zero** ("one pays, one is paid") draws the zero line explicitly.
 - **Near-zero gap** trips a copy rule ("essentially the same rate") — never a
   two-pixel bar implying a difference that isn't there.
@@ -138,9 +163,10 @@ Every component has a fixture for each hard case, each verified in both modes:
   reach in. Both palettes and the current mode are passed explicitly through
   `viz.render`, injected in the transport so no component can forget to honour
   the toggle. Verified: twin iframe paints the dark token in dark and the light
-  token in light. *(Known Streamlit lag: flipping the OS preference mid-session
-  repaints host chrome instantly but the components update on the next rerun; a
-  fresh load and the in-app Settings toggle are always correct.)*
+  token in light. *(Known Streamlit lag: changing the host theme repaints its
+  chrome immediately but custom HTML, charts and components receive the new
+  mode only on the next script rerun. The page tells the reader to choose
+  Rerun in the same menu.)*
 - **Auto-height.** Iframes don't self-size. A `useFrameHeight` hook reports the
   real height after every render, on element resize, and once more when web
   fonts settle. No scrollbars, no clipping (measured 366 px / 887 px live).
@@ -168,47 +194,104 @@ the direction hues collapsing in greyscale, and the frozen modelling schema
 moving underneath the app.
 
 The schema itself is authoritative from the **frozen files**
-(`train.csv` + `freeze_manifest.json`), never the README's prose — including the
-income-share rule (shares zeroed when total income < 1000) and the corrected
-`filestat` codes (the README mislabels joint filers as separated; the data and
-IPUMS codebook agree they are joint).
+(`train.csv` + `freeze_manifest.json`), never the README's prose. The locked
+order is:
+
+1. `unit_inctot` (`float64`)
+2. `wage_share` (`float64`)
+3. `business_share` (`float64`)
+4. `interest_share` (`float64`)
+5. `dividend_share` (`float64`)
+6. `retirement_share` (`float64`)
+7. `socsec_share` (`float64`)
+8. `rent_share` (`float64`)
+9. `spouse_income_share` (`float64`)
+10. `age` (`int64`)
+11. `nchild` (`int64`)
+12. `nchlt5` (`int64`)
+13. `famsize` (`int64`)
+14. `filing_status` (`int64`, categorical levels 1/4/5)
+15. `marst` (`int64`, categorical levels 1–6)
+16. `statefip` (`int64`, the 51 frozen state levels)
+
+The three categorical fields are one-hot encoded first, followed by the 13
+numeric fields, for 73 encoded columns. All eight shares are zeroed when
+whole-return income is below 1000. The form asks for whole-return income,
+spouse income separately, and seven source amounts for the primary filer plus
+claimed dependents excluding the spouse; `model_interface.py` alone derives
+the eight shares.
 
 ---
 
 ## Current state
 
 **Working and verified:**
-- Full page renders end to end in both light and dark, no exceptions.
+- Full page renders end to end against the real artifact in both authored
+  palettes, no exceptions.
 - Both React components render inside their iframes, correctly themed, auto-sized.
 - No column names, module names or filenames anywhere on screen.
-- Four sequenced chapters; form-first interaction (nothing computed until submit,
-  then live updates so the twin's "what if" stays light).
-- Negative rates, extremes and near-zero gaps all handled deliberately.
-- All six design guards pass; props serialise to the fixed contract.
+- Website hero and navigation; integrated conditional tax-unit form; four
+  sequenced result chapters.
+- Form-first interaction: nothing computes until submit, then changing the
+  profile or twin updates live.
+- Exact 16-column order/dtypes, frozen hashes, artifact checksum, scikit-learn
+  version, pipeline steps, category order and 73-column encoded output all
+  validate before use.
+- Live prediction, empirical percentile, SHAP add-back and all four twins pass.
+- Negative rates, the −48.6/32.6 prediction extremes, a zero-crossing twin and
+  a true zero-gap twin all preserve the deliberate copy and rendering rules.
+- All six design guards and 20 tests pass; both production bundles rebuild and
+  remain tracked and unignored.
 
-**Not yet done:**
-- **Model wiring** — waiting on Phase 3. Stubs stay stubs; the boundary is ready.
-- **Deploy-path check** — a fresh clone building only from committed artifacts
-  (no npm) has not been run yet.
-- **One small contract cleanup** — the twin needs the "changed" attribute in two
-  forms (sentence fragment + card label); it currently bridges this in-component.
-  A pre-written `changedLabel` field is the clean fix, deferred to avoid a merge
-  clash during the parallel build.
-- **Not started (out of scope for Phase 7):** the model itself (Phase 3), SHAP
-  (4), the real twin engine (5), IRS SOI validation (6), stretch goals (§8).
+**Still open:**
+- **Production artifact delivery is blocked.** The trained file is 275.7 MB,
+  is not in Git, and `models/*.joblib` is ignored. Choose one: Git LFS;
+  download-at-startup from versioned object storage with checksum verification;
+  or train and document a materially smaller artifact. Until then, a fresh
+  deployment shows the designed unavailable state rather than a fake rate.
+- **Fresh-clone deploy smoke test** after the artifact-delivery choice.
+- **IRS SOI validation** (Phase 6) and the README stretch goals.
+- **Streamlit ceiling:** viewport-edge bands, sticky scenes, bespoke widget
+  internals, a one-click in-page theme control and chrome removal need private
+  DOM hooks or the full React frontend. The current theme menu needs one manual
+  Rerun after choosing Light or Dark so custom HTML/charts/iframes receive the
+  new explicit palette.
 
 ---
 
 ## Running it
 
-Everything runs from the repo root. Python env needs `requirements.txt`.
+Everything runs from the repo root. Python 3.12+ is recommended.
 
 ```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements-dev.txt
+
+# Regenerate the ignored 275.7 MB artifact and matching metadata.
+MPLBACKEND=Agg jupyter nbconvert \
+  --to notebook \
+  --execute notebooks/train_random_forest.ipynb \
+  --output /tmp/train_random_forest.executed.ipynb \
+  --ExecutePreprocessor.timeout=-1
+
 streamlit run app.py
 ```
 
-Switch light/dark in Streamlit's own menu: **⋮ → Settings → Appearance**. Dark
-is the default.
+The notebook reads only the authoritative frozen CSVs and manifest. It writes
+`models/rf_eff_rate.joblib`, `models/rf_metrics.json`, and
+`reports/figures/phase3_residual_diagnostics.png`. The app finds the default
+artifact automatically. To use a matching artifact and metadata elsewhere:
+
+```bash
+TAX_MODEL_PATH=/absolute/path/to/rf_eff_rate.joblib \
+TAX_MODEL_METRICS_PATH=/absolute/path/to/rf_metrics.json \
+streamlit run app.py
+```
+
+Switch light/dark in Streamlit's top-right menu. Dark is the configured
+default. After choosing Light or Dark, choose **Rerun** in the same menu so the
+palette passed to custom HTML, Altair and both iframes updates too.
 
 **Developing a component** (hot reload alongside Streamlit):
 
@@ -220,10 +303,12 @@ TAX_VIZ_DEV=1 streamlit run app.py         # points the page at the dev server
 A component also renders standalone from any fixture with no Python:
 `http://localhost:5174/?fixture=negative&mode=light`.
 
-**Before deploying**, rebuild and commit each component's `build/`:
+**Before deploying**, rebuild and commit each component's `build/` if its
+source changed:
 
 ```bash
-cd components/twin && npm run build && git add -f build
+npm --prefix components/twin run build
+npm --prefix components/contribution run build
 ```
 
 ---
@@ -231,9 +316,10 @@ cd components/twin && npm run build && git add -f build
 ## Where things live
 
 ```
-app.py                     the page: form, four chapters, fallbacks
+app.py                     website shell, tax-unit form, four chapters, fallbacks
+page_style.py              token-driven semantic HTML for website-scale sections
 charts.py                  the two Altair visuals (headline rate, percentile)
-model_interface.py         THE model boundary — stubs now, one-file swap later
+model_interface.py         THE live model boundary — schema, load, predict, SHAP, twins
 codebook.py                codes → plain English (nothing internal reaches screen)
 viz.py                     the bridge to the React components (theme + height + fallback)
 design/
@@ -243,7 +329,9 @@ components/
   README.md                dev workflow, deploy, the two iframe gotchas
   twin/                     React: the twin comparison  (src/ + fixtures/ + committed build/)
   contribution/            React: the contribution chart (src/ + fixtures/ + committed build/)
-tests/test_design_system.py  guards against palette/build/contrast/schema drift
+tests/test_design_system.py guards against palette/build/contrast/schema drift
+tests/test_model_interface.py  16-feature/twin/SHAP-collapse boundary tests
+tests/test_codebook.py      truthfulness guards for reader-facing income language
 .streamlit/config.toml     both theme palettes (mirrors tokens.json)
 ```
 
@@ -251,10 +339,10 @@ tests/test_design_system.py  guards against palette/build/contrast/schema drift
 
 ## The judgement calls worth knowing about
 
-- **`filestat` codes** — the README mislabels two joint-filer codes as
-  "separated"; the frozen data and IPUMS codebook agree they are joint filers
-  split by age. The UI uses the correct labels. (This was the early catch that
-  set the "trust the frozen files, not the prose" rule.)
+- **Filing-status codes** — the earlier person-level prose mislabelled joint
+  filers. The current authoritative tax-unit freeze collapses filing status to
+  1/4/5 and the UI derives exactly those ordinary combinations. This was the
+  catch that set the "trust the frozen files, not the prose" rule.
 - **Percentile stayed Altair** — stated plainly rather than built in React for
   symmetry. Custom rendering is spent only where it carries the argument.
 - **The 3:1 hue rule was dropped with a proof**, not quietly. Direction is

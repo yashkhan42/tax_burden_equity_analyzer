@@ -117,7 +117,7 @@ def test_frozen_schema_is_unchanged() -> None:
     import model_interface as mi
 
     assert list(mi.FEATURE_COLS) == manifest["feature_cols"]
-    assert mi.INCTOT_SHARE_FLOOR == manifest["inctot_share_floor"]
+    assert mi.INCTOT_SHARE_FLOOR == manifest["share_floor"]
 
 
 if __name__ == "__main__":
