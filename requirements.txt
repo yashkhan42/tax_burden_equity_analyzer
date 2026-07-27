@@ -1,12 +1,19 @@
+# Streamlit fallback runtime.
+streamlit==1.60.0
+pandas==2.3.3
+altair==6.2.2
+
+# Data and notebook support merged from main.
 certifi==2026.6.17
 charset-normalizer==3.4.7
 et_xmlfile==2.0.0
 idna==3.18
-numpy==2.5.0
+# SHAP's Numba runtime currently requires NumPy < 2.5.
+numpy==2.4.4
 openpyxl==3.1.5
 packaging==26.2
-pandas==3.0.3
-pyarrow==25.0.0
+# Streamlit 1.60 requires pyarrow < 25.
+pyarrow==24.0.0
 python-dateutil==2.9.0.post0
 PyYAML==6.0.3
 requests==2.34.2
@@ -14,3 +21,14 @@ six==1.17.0
 tzdata==2026.2
 urllib3==2.7.0
 xlrd==2.0.2
+
+# Trained-model runtime. The scikit-learn version must exactly match the
+# serialized Random Forest recorded in models/rf_metrics.json.
+scikit-learn==1.7.2
+joblib==1.5.3
+shap==0.52.0
+matplotlib==3.11.1
+
+# Standalone website API.
+fastapi==0.139.2
+uvicorn==0.51.0

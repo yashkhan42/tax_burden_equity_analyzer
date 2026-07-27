@@ -2,10 +2,75 @@
 
 **Project:** AI4ALL Ignite — Finance & Business domain
 **Version:** 1.0
-**Status:** Development-ready
+**Status:** Path C website complete locally; production model delivery pending
 **Audience:** Developer / coding agent building the system end to end
 
 ---
+
+## Current application
+
+The primary interface is now a standalone Next.js website backed by FastAPI.
+The existing Streamlit hybrid remains intact as a fallback. Both applications
+call the same public functions in `model_interface.py`; neither the API nor the
+frontend reimplements feature construction, artifact validation, prediction,
+SHAP add-back, percentile, or twin logic.
+
+| Layer | Location | Responsibility |
+|---|---|---|
+| Next.js website | `frontend/` | Form, themes, narrative sections, and all three visualisations |
+| FastAPI service | `backend/` | Semantic HTTP contract and presentation-safe responses |
+| Model boundary | `model_interface.py` | The authoritative 16-feature tax-unit contract and all model operations |
+| Streamlit fallback | `app.py` | Existing hybrid demonstration using the same model boundary |
+
+The service loads `models/rf_eff_rate.joblib` by default. That 275 MB artifact
+is intentionally not committed. Generate it with
+`notebooks/train_random_forest.ipynb`, point `TAX_MODEL_PATH` to another local
+copy, or configure `TAX_MODEL_DOWNLOAD_URL` for verified download at service
+startup. The expected SHA-256 is read from `models/rf_metrics.json`; a
+mismatched download is rejected before it can be loaded.
+
+### Run the standalone website locally
+
+Create the Python environment once:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements-dev.txt
+```
+
+If the model file is absent, run the training notebook once:
+
+```bash
+MPLBACKEND=Agg jupyter nbconvert \
+  --to notebook \
+  --execute notebooks/train_random_forest.ipynb \
+  --output train_random_forest.executed.ipynb \
+  --output-dir /tmp \
+  --ExecutePreprocessor.timeout=-1
+```
+
+It writes `models/rf_eff_rate.joblib`, refreshes its checksum and metrics in
+`models/rf_metrics.json`, and redraws the model diagnostic.
+
+Start the API:
+
+```bash
+source .venv/bin/activate
+python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000
+```
+
+In a second terminal, start the website:
+
+```bash
+cd frontend
+npm ci
+cp .env.example .env.local
+npm run dev
+```
+
+Open `http://localhost:3000`. The frontend expects the API at
+`http://localhost:8000` unless `NEXT_PUBLIC_API_URL` says otherwise.
 
 ## 1. Purpose & One-Sentence Definition
 
@@ -237,9 +302,9 @@ Once Phase 2 is frozen, Phases 4/5/6 and the stretch goals run in parallel acros
 ## 11. Definition of Done (Core)
 
 - [ ] Every column assigned and documented (target / feature / quarantine).
-- [ ] Filer-unit table built; `train.csv` / `test.csv` frozen with fixed seed.
-- [ ] Random Forest trained; R², MAE, and residual diagnostics reported.
+- [x] Filer-unit table built; `train.csv` / `test.csv` frozen with fixed seed.
+- [x] Random Forest trained; R², MAE, and residual diagnostics reported.
 - [ ] SHAP global summary + per-filer waterfall rendering correctly.
-- [ ] Twin comparison isolates single-attribute rate gaps.
+- [x] Twin comparison isolates reader-facing rate gaps.
 - [ ] Model validated against IRS SOI 2023 by income band, sources kept distinct.
-- [ ] Streamlit demo integrates prediction, percentile, waterfall, and twin comparison.
+- [x] Streamlit demo integrates prediction, percentile, contribution explanation, and twin comparison.

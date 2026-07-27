@@ -1,0 +1,52 @@
+{
+  "mode": "dark",
+  "baseline": 9.2,
+  "predicted": 6.3,
+  "reasons": [
+    {
+      "text": "having two children at home and claiming both of them, which is what most of this difference comes down to",
+      "points": -2.4
+    },
+    {
+      "text": "earning a little less than the typical filer in the same part of the country",
+      "points": -1.1
+    },
+    {
+      "text": "almost all of the household income arriving as wages from a single employer rather than from savings or a business",
+      "points": 0.8
+    },
+    {
+      "text": "filing alone",
+      "points": 0.3
+    }
+  ],
+  "remainder": -0.5,
+  "nothingStandsOut": false,
+  "isPlaceholder": true,
+  "tokens": {
+    "fontSans": "Source Sans Pro, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+    "fontMono": "Source Code Pro, ui-monospace, SFMono-Regular, Menlo, monospace",
+    "fontSerif": "Source Serif Pro, Georgia, serif",
+    "radius": 4,
+    "dark": {
+      "background": "#0E1513",
+      "surface": "#161F1D",
+      "ink": "#E9E7E2",
+      "muted": "#94A09D",
+      "hairline": "#2A3634",
+      "shape": "#3A4A47",
+      "accent": "#8AD0EA",
+      "raised": "#BE7636"
+    },
+    "light": {
+      "background": "#FAF8F4",
+      "surface": "#F0EDE6",
+      "ink": "#17201E",
+      "muted": "#556360",
+      "hairline": "#DAD5CA",
+      "shape": "#C9C2B4",
+      "accent": "#3075A6",
+      "raised": "#6F2E0D"
+    }
+  }
+}

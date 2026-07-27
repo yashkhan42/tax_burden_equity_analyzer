@@ -1,0 +1,65 @@
+{
+  "mode": "dark",
+  "changed": "whether they have children",
+  "a": {
+    "label": "no children at home",
+    "rate": 1.9,
+    "display": "1.9%"
+  },
+  "b": {
+    "label": "two children at home",
+    "rate": -7.1,
+    "display": "−7.1%"
+  },
+  "shared": [
+    {
+      "label": "Income",
+      "value": "$41,000 a year, mostly from a paycheck"
+    },
+    {
+      "label": "Age",
+      "value": "34"
+    },
+    {
+      "label": "How they file",
+      "value": "on their own"
+    },
+    {
+      "label": "Where they live",
+      "value": "a mid-sized city in the South"
+    },
+    {
+      "label": "Health coverage",
+      "value": "through an employer"
+    }
+  ],
+  "gapPoints": -9.0,
+  "gapMoney": "About $3,700 a year at this income.",
+  "isPlaceholder": true,
+  "tokens": {
+    "fontSans": "Source Sans Pro, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+    "fontMono": "Source Code Pro, ui-monospace, SFMono-Regular, Menlo, monospace",
+    "fontSerif": "Source Serif Pro, Georgia, serif",
+    "radius": 4,
+    "dark": {
+      "background": "#0E1513",
+      "surface": "#161F1D",
+      "ink": "#E9E7E2",
+      "muted": "#94A09D",
+      "hairline": "#2A3634",
+      "shape": "#3A4A47",
+      "accent": "#8AD0EA",
+      "raised": "#BE7636"
+    },
+    "light": {
+      "background": "#FAF8F4",
+      "surface": "#F0EDE6",
+      "ink": "#17201E",
+      "muted": "#556360",
+      "hairline": "#DAD5CA",
+      "shape": "#C9C2B4",
+      "accent": "#3075A6",
+      "raised": "#6F2E0D"
+    }
+  }
+}
