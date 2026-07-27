@@ -32,6 +32,34 @@ def configured_artifact_path() -> Path:
     return Path(configured).expanduser().resolve() if configured else DEFAULT_ARTIFACT
 
 
+def configured_download_url(metadata_path: Path = DEFAULT_METADATA) -> str | None:
+    """Resolve where the canonical artifact is published.
+
+    ``TAX_MODEL_DOWNLOAD_URL`` wins so a deployment can point at a mirror or a
+    pre-release build. Otherwise the URL recorded in the committed model
+    metadata is used, which lets a host that installs requirements and runs the
+    app -- Streamlit Community Cloud, for one -- obtain the artifact with no
+    configuration at all.
+
+    Returns ``None`` when neither source names a URL, leaving the caller to
+    degrade rather than guess an address.
+    """
+    configured = os.environ.get("TAX_MODEL_DOWNLOAD_URL")
+    if configured:
+        return configured
+    try:
+        metadata = json.loads(metadata_path.read_text())
+    except (FileNotFoundError, OSError, json.JSONDecodeError):
+        return None
+    url = metadata.get("final_model", {}).get("distribution", {}).get("url")
+    return url if isinstance(url, str) and url else None
+
+
+def download_token() -> str | None:
+    """Token for a private release; a public release needs none."""
+    return os.environ.get("TAX_MODEL_DOWNLOAD_TOKEN") or os.environ.get("GITHUB_TOKEN")
+
+
 def expected_artifact_sha256(metadata_path: Path) -> str:
     try:
         metadata = json.loads(metadata_path.read_text())

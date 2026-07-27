@@ -22,12 +22,39 @@ SHAP add-back, percentile, or twin logic.
 | Model boundary | `model_interface.py` | The authoritative 16-feature tax-unit contract and all model operations |
 | Streamlit fallback | `app.py` | Existing hybrid demonstration using the same model boundary |
 
-The service loads `models/rf_eff_rate.joblib` by default. That 275 MB artifact
-is intentionally not committed. Generate it with
-`notebooks/train_random_forest.ipynb`, point `TAX_MODEL_PATH` to another local
-copy, or configure `TAX_MODEL_DOWNLOAD_URL` for verified download at service
-startup. The expected SHA-256 is read from `models/rf_metrics.json`; a
-mismatched download is rejected before it can be loaded.
+The service loads `models/rf_eff_rate.joblib` by default. That 263 MB artifact
+is intentionally not committed.
+
+**Fetch the canonical build — don't retrain:**
+
+```bash
+python3 scripts/fetch_model.py
+```
+
+One build is canonical, published as a GitHub Release asset
+(`model-v1`). Everyone holding those exact bytes is what makes the
+`artifact_sha256` in `models/rf_metrics.json` a real guarantee: identical
+predictions and identical SHAP attributions on every machine and in
+deployment. The download streams to a `.part` file, is checked against that
+SHA-256, and is promoted only after it verifies, so a truncated or corrupted
+transfer can never land at the destination path.
+
+Use `--check` to verify what is already on disk without touching the network,
+and `--force` to replace a local build with the canonical bytes. A private
+release needs `GITHUB_TOKEN`; the public one does not.
+
+**Rebuilding locally still works.** `notebooks/train_random_forest.ipynb`
+reproduces the model from the frozen tables and a fixed seed. The rebuilt
+forest is behaviourally identical but its *bytes* differ, because joblib output
+is not byte-reproducible across machines — so it will not match the committed
+checksum. The loader accepts it anyway, but only after it reproduces the logged
+test metrics (R² 0.9005, MAE 1.2770) on the frozen test set, and warns that it
+is doing so. Byte equality is the fast path; behavioural identity is the
+fallback; a genuinely different model is still rejected.
+
+`TAX_MODEL_PATH` points at a local copy elsewhere.
+`TAX_MODEL_DOWNLOAD_URL` overrides the release URL for verified download at
+service startup.
 
 ### Run the standalone website locally
 
@@ -39,7 +66,15 @@ source .venv/bin/activate
 python -m pip install -r requirements-dev.txt
 ```
 
-If the model file is absent, run the training notebook once:
+If the model file is absent, fetch the canonical build:
+
+```bash
+python3 scripts/fetch_model.py
+```
+
+Retraining also works and is the right move when the frozen tables or the
+modelling code change, but prefer fetching when you only need to *run* the app —
+see the artifact note above for why byte-identical copies matter:
 
 ```bash
 MPLBACKEND=Agg jupyter nbconvert \
@@ -51,7 +86,8 @@ MPLBACKEND=Agg jupyter nbconvert \
 ```
 
 It writes `models/rf_eff_rate.joblib`, refreshes its checksum and metrics in
-`models/rf_metrics.json`, and redraws the model diagnostic.
+`models/rf_metrics.json`, and redraws the model diagnostic. Publish the result
+as a new release and update `final_model.distribution` if it becomes canonical.
 
 Start the API:
 
@@ -71,6 +107,42 @@ npm run dev
 
 Open `http://localhost:3000`. The frontend expects the API at
 `http://localhost:8000` unless `NEXT_PUBLIC_API_URL` says otherwise.
+
+### Deploy the Streamlit app
+
+Point Streamlit Community Cloud at `app.py` on the default branch. **No secrets
+and no configuration are required**: the release URL is read from
+`models/rf_metrics.json`, so a host that installs `requirements.txt` and runs
+the app obtains the predictor by itself.
+
+What happens on a cold start, measured end to end:
+
+| Step | Cost |
+|---|---|
+| Fetch the 263 MB artifact and load it | ~18 s, once per app process |
+| First answer (prediction reference + first explanation) | ~5 s |
+| Peak memory | ~1.5 GB |
+
+The fetch is started in a background thread as the page opens, so it overlaps
+with the reader filling in the form rather than following their first question.
+It is guarded by a lock, so several readers arriving at a cold app produce one
+download rather than one each. A failed fetch is not an error the reader sees:
+the page falls back to its ordinary "not available in this copy" notice.
+
+Peak memory sits against Community Cloud's ceiling of roughly 2.7 GB. It fits,
+but the headroom is not large, and almost all of it is the forest itself
+(837 MB loaded). If the app is ever killed for memory, the lever with the best
+ratio is the runner-up configuration from the Phase 3 search —
+`min_samples_leaf=5` scored a cross-validated MAE of 1.355 against the chosen
+1.319, about a 3% accuracy cost for substantially fewer leaves to hold in
+memory and a proportionally faster explanation.
+
+Two environment variables matter to a deployment, neither of them required:
+
+| Variable | Effect |
+|---|---|
+| `TAX_MODEL_DOWNLOAD_URL` | Fetch from a mirror or a pre-release instead of the recorded release |
+| `TAX_MODEL_FETCH=0` | Never fetch; use only a local artifact. For offline or air-gapped hosts |
 
 ## 1. Purpose & One-Sentence Definition
 

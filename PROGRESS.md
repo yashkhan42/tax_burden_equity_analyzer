@@ -52,9 +52,22 @@ The boundary is strict:
   are streamed to a partial file, verified against the metrics SHA-256, and
   atomically promoted. Configure `TAX_MODEL_DOWNLOAD_URL` and optionally
   `TAX_MODEL_DOWNLOAD_TOKEN` or `GITHUB_TOKEN`.
-- Production artifact delivery is still the deploy blocker. A GitHub Release
-  asset downloaded at startup with checksum verification is the preferred
-  direction; no release asset or production backend host has been created yet.
+- Production artifact delivery is **resolved for the Streamlit app**. One
+  canonical build is published as the `model-v1` release asset, and its URL is
+  recorded in `models/rf_metrics.json` under `final_model.distribution`, so a
+  host needs no configuration. `model_interface` fetches it on first use when
+  no artifact is on disk, under a lock so concurrent readers cause one
+  download; `app.py` starts that fetch in the background as the page opens.
+  Measured cold start: ~18 s to fetch and load, ~5 s to first answer, ~1.5 GB
+  peak against Community Cloud's ~2.7 GB ceiling. `scripts/fetch_model.py`
+  does the same fetch from a terminal.
+- Because joblib output is not byte-reproducible across machines, a locally
+  rebuilt artifact no longer fails to load: byte equality with the committed
+  checksum is the fast path, and an artifact whose bytes differ is admitted
+  only after it reproduces the logged test metrics, with a warning. Downloads
+  are still strictly byte-verified before promotion.
+- A production **backend** host for the FastAPI service is still outstanding.
+  `bootstrap_artifact()` remains env-var driven there and is unchanged.
 
 ### Verification completed
 
