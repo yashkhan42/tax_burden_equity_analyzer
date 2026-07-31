@@ -292,20 +292,27 @@ h3 {
 .hero-argument {
   position: relative;
   display: grid;
+  overflow: hidden;
   gap: 24px;
   align-self: stretch;
   padding: 32px;
-  border: 1px solid color-mix(in srgb, var(--background) 20%, transparent);
+  border: 1px solid var(--hairline);
   border-radius: var(--radius);
-  background: var(--ink);
-  color: var(--background);
-  box-shadow: 0 48px 96px color-mix(in srgb, var(--background) 24%, transparent);
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--shape) 18%, var(--surface)),
+    var(--surface) 48%
+  );
+  color: var(--ink);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--ink) 6%, transparent),
+    0 48px 96px color-mix(in srgb, var(--background) 48%, transparent);
 }
 
 .hero-card-close {
+  color: var(--muted);
   font-size: 12px;
   line-height: 1.33;
-  opacity: 0.68;
 }
 
 .hero-filer {
@@ -314,11 +321,11 @@ h3 {
   align-items: baseline;
   gap: 8px 24px;
   padding-block: 24px;
-  border-block: 1px solid
-    color-mix(in srgb, var(--background) 20%, transparent);
+  border-block: 1px solid var(--hairline);
 }
 
 .hero-filer span {
+  color: var(--muted);
   font-size: 14px;
 }
 
@@ -332,8 +339,8 @@ h3 {
 
 .hero-filer small {
   grid-column: 1 / -1;
+  color: var(--muted);
   font-size: 12px;
-  opacity: 0.68;
 }
 
 .hero-connector {
@@ -345,10 +352,11 @@ h3 {
 
 .hero-connector span {
   height: 1px;
-  background: color-mix(in srgb, var(--background) 28%, transparent);
+  background: var(--shape);
 }
 
 .hero-connector p {
+  color: var(--muted);
   font-size: 12px;
 }
 
