@@ -1,0 +1,288 @@
+{
+  "phase": 5,
+  "spec": "README \u00a75.2 (twin comparison, hold-all-flip-one)",
+  "units": "effective-rate percentage points",
+  "source": {
+    "data": "data/processed/test.csv (frozen)",
+    "filers": 12247
+  },
+  "flip_fields": {
+    "filing_status": [
+      "filing_status"
+    ],
+    "marital_status": [
+      "filing_status",
+      "marst"
+    ],
+    "dominant_income_source": [
+      "incbus",
+      "incdivid",
+      "incint",
+      "incrent",
+      "incretir",
+      "incss",
+      "incwage"
+    ],
+    "dependents": [
+      "famsize",
+      "nchild",
+      "nchlt5"
+    ]
+  },
+  "summary": {
+    "filing_status": {
+      "twins": 12247.0,
+      "mean_gap": -2.902266582,
+      "median_gap": 2.1075278358,
+      "std_gap": 13.723433906,
+      "p10": -23.0960621601,
+      "p90": 7.4403101615,
+      "share_gap_negative": 0.4761166,
+      "share_gap_negligible": 0.0002449579
+    },
+    "marital_status": {
+      "twins": 12247.0,
+      "mean_gap": 0.1788566926,
+      "median_gap": -0.4495192034,
+      "std_gap": 7.6709937632,
+      "p10": -7.0008200274,
+      "p90": 7.3361173963,
+      "share_gap_negative": 0.5181677145,
+      "share_gap_negligible": 0.0022862742
+    },
+    "dominant_income_source": {
+      "twins": 9476.0,
+      "mean_gap": -1.5800545204,
+      "median_gap": -2.353796848,
+      "std_gap": 4.081609162,
+      "p10": -5.403263801,
+      "p90": 2.9802923319,
+      "share_gap_negative": 0.7603419164,
+      "share_gap_negligible": 0.0077036724
+    },
+    "dependents": {
+      "twins": 12247.0,
+      "mean_gap": 0.5600231459,
+      "median_gap": -0.0122228975,
+      "std_gap": 4.6174739219,
+      "p10": -2.3067643956,
+      "p90": 3.7016906381,
+      "share_gap_negative": 0.5316404017,
+      "share_gap_negligible": 0.1891075365
+    }
+  },
+  "marriage_by_direction": {
+    "single/HoH -> joint": {
+      "filers": 6883,
+      "mean_gap": -4.8436369573,
+      "median_gap": -4.8514782715,
+      "training_examples_in_target_region": 1370,
+      "status": "supported"
+    },
+    "joint -> single": {
+      "filers": 5364,
+      "mean_gap": 6.6236411431,
+      "median_gap": 5.7181779981,
+      "training_examples_in_target_region": 0,
+      "status": "EXTRAPOLATION - not quoted as a finding"
+    }
+  },
+  "gap_by_income_decile": {
+    "0": {
+      "income_from": 1.0,
+      "income_to": 22000.0,
+      "filing_status": -18.460176663,
+      "marital_status": -2.578904006,
+      "dominant_income_source": 2.6739993891,
+      "dependents": 0.097499537,
+      "marriage (supported only)": -3.8028851413
+    },
+    "1": {
+      "income_from": 22001.0,
+      "income_to": 32075.0,
+      "filing_status": -10.8075928888,
+      "marital_status": -3.280116219,
+      "dominant_income_source": -0.0351494024,
+      "dependents": 0.8474374483,
+      "marriage (supported only)": -5.7079586429
+    },
+    "2": {
+      "income_from": 32100.0,
+      "income_to": 43000.0,
+      "filing_status": -6.0334883517,
+      "marital_status": -2.4242824969,
+      "dominant_income_source": -1.6208388606,
+      "dependents": 0.9646472184,
+      "marriage (supported only)": -5.5888968933
+    },
+    "3": {
+      "income_from": 43001.0,
+      "income_to": 53097.0,
+      "filing_status": -2.4576351776,
+      "marital_status": -1.6791998377,
+      "dominant_income_source": -2.2032088514,
+      "dependents": 0.7242261763,
+      "marriage (supported only)": -4.9576112259
+    },
+    "4": {
+      "income_from": 53098.0,
+      "income_to": 67520.0,
+      "filing_status": -1.3599673846,
+      "marital_status": -0.5830312693,
+      "dominant_income_source": -2.5301207926,
+      "dependents": 0.3586685079,
+      "marriage (supported only)": -4.1425201651
+    },
+    "5": {
+      "income_from": 67550.0,
+      "income_to": 85699.0,
+      "filing_status": -0.3045813799,
+      "marital_status": 0.1659793209,
+      "dominant_income_source": -3.2652718476,
+      "dependents": 0.4463632809,
+      "marriage (supported only)": -4.4157523211
+    },
+    "6": {
+      "income_from": 85710.0,
+      "income_to": 110062.0,
+      "filing_status": 1.5380391932,
+      "marital_status": 1.6406616817,
+      "dominant_income_source": -2.8172693227,
+      "dependents": 0.6397442067,
+      "marriage (supported only)": -5.090762713
+    },
+    "7": {
+      "income_from": 110071.0,
+      "income_to": 148420.0,
+      "filing_status": 2.7596977106,
+      "marital_status": 2.8877455555,
+      "dominant_income_source": -2.7792981953,
+      "dependents": 0.6008638461,
+      "marriage (supported only)": -5.2327800864
+    },
+    "8": {
+      "income_from": 148485.0,
+      "income_to": 213700.0,
+      "filing_status": 2.751825845,
+      "marital_status": 3.250872289,
+      "dominant_income_source": -2.901706701,
+      "dependents": 0.4946741981,
+      "marriage (supported only)": -4.6457947726
+    },
+    "9": {
+      "income_from": 213760.0,
+      "income_to": 1672866.0,
+      "filing_status": 3.5212003593,
+      "marital_status": 4.3862810199,
+      "dominant_income_source": -2.0525317669,
+      "dependents": 0.4357874307,
+      "marriage (supported only)": -5.2917938298
+    }
+  },
+  "worked_examples": [
+    {
+      "comparison": "marriage (supported)",
+      "test_row": 2955,
+      "income": 200071.0,
+      "children": 0,
+      "from": "never married",
+      "to": "married, living together",
+      "base_rate": 18.84,
+      "twin_rate": 13.98,
+      "gap": -4.85
+    },
+    {
+      "comparison": "marriage (supported)",
+      "test_row": 1204,
+      "income": 49878.0,
+      "children": 0,
+      "from": "widowed",
+      "to": "married, living together",
+      "base_rate": 4.02,
+      "twin_rate": -0.83,
+      "gap": -4.85
+    },
+    {
+      "comparison": "marriage (supported)",
+      "test_row": 1744,
+      "income": 41000.0,
+      "children": 0,
+      "from": "widowed",
+      "to": "married, living together",
+      "base_rate": 7.34,
+      "twin_rate": 2.49,
+      "gap": -4.85
+    },
+    {
+      "comparison": "dependents",
+      "test_row": 3665,
+      "income": 47347.0,
+      "children": 0,
+      "from": "no children",
+      "to": "2 children",
+      "base_rate": 6.06,
+      "twin_rate": 6.05,
+      "gap": -0.01
+    },
+    {
+      "comparison": "dependents",
+      "test_row": 627,
+      "income": 28000.0,
+      "children": 1,
+      "from": "1 child",
+      "to": "no children",
+      "base_rate": 5.29,
+      "twin_rate": 5.27,
+      "gap": -0.01
+    },
+    {
+      "comparison": "dependents",
+      "test_row": 3806,
+      "income": 62020.0,
+      "children": 0,
+      "from": "no children",
+      "to": "2 children",
+      "base_rate": 9.32,
+      "twin_rate": 9.31,
+      "gap": -0.01
+    },
+    {
+      "comparison": "income source",
+      "test_row": 5496,
+      "income": 80000.0,
+      "children": 0,
+      "from": "mostly from a paycheck",
+      "to": "mostly from investments",
+      "base_rate": 7.04,
+      "twin_rate": 4.69,
+      "gap": -2.35
+    },
+    {
+      "comparison": "income source",
+      "test_row": 6106,
+      "income": 253680.0,
+      "children": 2,
+      "from": "mostly from a paycheck",
+      "to": "mostly from investments",
+      "base_rate": 13.82,
+      "twin_rate": 11.46,
+      "gap": -2.35
+    },
+    {
+      "comparison": "income source",
+      "test_row": 7688,
+      "income": 61344.0,
+      "children": 1,
+      "from": "mostly from a paycheck",
+      "to": "mostly from investments",
+      "base_rate": 4.26,
+      "twin_rate": 1.91,
+      "gap": -2.35
+    }
+  ],
+  "caveats": [
+    "joint -> single keeps the spouse's income attached; the frozen table has zero non-joint filers with spouse income, so that direction is extrapolation and is reported but never quoted as a finding.",
+    "'Flip exactly one' means one reader-facing attribute. marital_status necessarily moves filing_status with it, and dependents moves famsize, because those pairs are structurally inseparable in this data.",
+    "A twin gap is what the MODEL does when one attribute moves. It is evidence about a fitted function, not a causal estimate of tax law."
+  ]
+}

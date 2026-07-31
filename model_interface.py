@@ -139,6 +139,18 @@ class ModelContractError(ModelInterfaceError):
     """The artifact, metadata, freeze, or profile violates the locked schema."""
 
 
+class TwinNotAvailable(ModelInterfaceError):
+    """This filer has nothing to flip for the requested comparison.
+
+    Distinct from a failure: the profile is valid and the model is fine, there
+    is simply no counterfactual to draw. A filer whose entire income is their
+    spouse's has no own income source to move, so a "different dominant source"
+    twin would be the same filer relabelled. Returning a zero gap under a
+    changed label would state a comparison that was never made, so the caller
+    is told instead and can leave that comparison out.
+    """
+
+
 def _read_json(path: Path, description: str) -> dict[str, Any]:
     try:
         return json.loads(path.read_text())
@@ -798,8 +810,17 @@ def _flip_profile(
     if flip_attribute == "dominant_income_source":
         amounts = {source: float(profile[source]) for source in SHARE_SOURCE.values()}
         source = max(amounts, key=amounts.get)
-        target = "incdivid" if source == "incwage" else "incwage"
         moved = amounts[source]
+        # A spouse's income has no source breakdown in the frozen build, so it
+        # cannot be recomposed. When it is the largest part of the return, or
+        # when there is simply nothing positive to move, no honest twin exists:
+        # every own-source amount would stay exactly where it is and the gap
+        # would be zero under a label claiming the composition had changed.
+        if moved <= 0 or float(profile[SPOUSE_INCOME_KEY]) > moved:
+            raise TwinNotAvailable(
+                "this filer has no own income source large enough to recompose"
+            )
+        target = "incdivid" if source == "incwage" else "incwage"
         twin[source] = amounts[source] - moved
         twin[target] = amounts[target] + moved
         return twin, _income_label(source), _income_label(target)
@@ -827,6 +848,24 @@ def _income_label(source: str) -> str:
 
 def _children_label(n: int) -> str:
     return "no children" if n == 0 else f"{n} {'child' if n == 1 else 'children'}"
+
+
+def available_flips(profile: dict[str, Any]) -> tuple[str, ...]:
+    """Which comparisons can actually be drawn for this filer.
+
+    Not every filer has every twin. Offering a comparison that cannot be made
+    and reporting the failure afterwards is worse than not offering it, so a
+    caller building a menu should build it from this rather than from
+    :data:`TWIN_FLIP_ATTRIBUTES`. Requires no model.
+    """
+    available = []
+    for attribute in TWIN_FLIP_ATTRIBUTES:
+        try:
+            _flip_profile(profile, attribute)
+        except TwinNotAvailable:
+            continue
+        available.append(attribute)
+    return tuple(available)
 
 
 def get_twin(

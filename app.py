@@ -875,18 +875,28 @@ def chapter_four(filer: dict) -> None:
             "worth. This is one comparison, not a finding about the country."
         )
         space(FIGURE_GAP)
+        # Only comparisons that can actually be drawn for this filer are
+        # offered. A filer whose income is entirely their spouse's has no own
+        # source to recompose, and a menu entry that answers with an apology is
+        # worse than one that was never there.
+        choices = mi.available_flips(filer)
         change = st.selectbox(
             "Change one thing",
-            options=mi.TWIN_FLIP_ATTRIBUTES,
+            options=choices,
             format_func=question_for,
             key="change_one_thing",
             label_visibility="collapsed",
-        )
+        ) if choices else None
 
     with figure:
-        props = twin_props(filer, change)
-        if not viz.render("twin", mode=theme_type(), key="twin", **props):
-            twin_in_words(props)
+        if change is None:
+            st.markdown(
+                "There is nothing to hold constant and change for this filer."
+            )
+        else:
+            props = twin_props(filer, change)
+            if not viz.render("twin", mode=theme_type(), key="twin", **props):
+                twin_in_words(props)
 
 
 # ---------------------------------------------------------------------------

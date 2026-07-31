@@ -294,3 +294,58 @@ def test_download_url_falls_back_to_committed_metadata(monkeypatch) -> None:
     monkeypatch.delenv("TAX_MODEL_DOWNLOAD_URL", raising=False)
     url = configured_download_url()
     assert url is not None and "releases/download" in url
+
+
+# ---------------------------------------------------------------------------
+# Twin availability (a comparison that cannot be drawn must not be invented)
+# ---------------------------------------------------------------------------
+
+
+def test_income_source_twin_refuses_when_the_spouse_dominates() -> None:
+    """The spouse's income has no source breakdown, so it cannot be recomposed.
+
+    Previously this returned the filer unchanged while labelling the comparison
+    as paycheck-to-investments, reporting a zero gap for a flip that never
+    happened.
+    """
+    all_spouse = profile(
+        spouse_income=100_000, incwage=0, incbus=0, incint=0,
+        incdivid=0, incretir=0, incss=0, incrent=0,
+    )
+    with pytest.raises(mi.TwinNotAvailable):
+        mi._flip_profile(all_spouse, "dominant_income_source")
+    assert "dominant_income_source" not in mi.available_flips(all_spouse)
+
+
+def test_income_source_twin_refuses_when_nothing_is_positive() -> None:
+    nothing_to_move = profile(
+        spouse_income=0, incwage=0, incbus=0, incint=0,
+        incdivid=0, incretir=0, incss=0, incrent=0,
+    )
+    with pytest.raises(mi.TwinNotAvailable):
+        mi._flip_profile(nothing_to_move, "dominant_income_source")
+
+
+def test_an_ordinary_filer_keeps_every_comparison() -> None:
+    wage_heavy = profile(spouse_income=0, filing_status=5, marst=6, incwage=90_000)
+    assert mi.available_flips(wage_heavy) == mi.TWIN_FLIP_ATTRIBUTES
+    twin, before, after = mi._flip_profile(wage_heavy, "dominant_income_source")
+    assert twin["incwage"] == 0
+    assert twin["incdivid"] == pytest.approx(90_000 + wage_heavy["incdivid"])
+    assert before != after
+
+
+def test_a_twin_changes_only_the_intended_fields() -> None:
+    """§5.2's requirement: hold every feature constant, flip exactly one."""
+    base = profile(spouse_income=0, filing_status=5, marst=6)
+    expected = {
+        "filing_status": {"filing_status"},
+        "marital_status": {"marst", "filing_status"},
+        "dominant_income_source": {"incwage", "incdivid"},
+        "dependents": {"nchild", "nchlt5", "famsize"},
+    }
+    for attribute, allowed in expected.items():
+        twin, _, _ = mi._flip_profile(base, attribute)
+        changed = {k for k in base if base[k] != twin[k]}
+        assert changed <= allowed, f"{attribute} also changed {changed - allowed}"
+        assert changed, f"{attribute} changed nothing"
