@@ -11,11 +11,18 @@
 # ---------------------------------------------------------------- web build
 FROM node:22-bookworm-slim AS web
 
-WORKDIR /build
+# The repo layout is reproduced rather than flattened: the `prebuild` hook runs
+# scripts/sync-tokens.mjs, which reads ../design/tokens.json. That palette sits
+# at the repo root because the Streamlit theme shares it, so the two surfaces
+# cannot drift apart. Copying only frontend/ leaves the build looking for
+# /design/tokens.json and failing.
+WORKDIR /build/frontend
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci
 
+COPY design/ /build/design/
 COPY frontend/ ./
+
 # An empty base URL makes the browser request /api/v1/... relative to whatever
 # host is serving the page. A real environment variable beats any committed
 # .env file in Next.js, so this wins over the local development default.
@@ -43,7 +50,7 @@ COPY data/processed/freeze_manifest.json ./data/processed/
 COPY data/processed/train.csv ./data/processed/
 COPY data/processed/test.csv ./data/processed/
 
-COPY --from=web /build/out ./frontend/out
+COPY --from=web /build/frontend/out ./frontend/out
 
 # Hosts commonly run the container as a non-root user with no write access to
 # /app, and the artifact has to land somewhere writable on first boot.

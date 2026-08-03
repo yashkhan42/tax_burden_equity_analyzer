@@ -29,15 +29,16 @@ swap_size_mb = 512
   min_machines_running = 1
 
 # Startup blocks in the FastAPI lifespan hook until the forest is downloaded
-# and warm, so the port stays closed for roughly 40s on a cold boot. The grace
-# period has to outlast that or Fly kills a machine that is merely busy being
-# born.
+# and warm, so the port stays closed for roughly 25-40s on a cold boot and the
+# check has to not fire until after that. One minute is Fly's ceiling here --
+# anything larger is silently clamped, so it is set explicitly rather than
+# asking for a value that will not be honoured.
 [[http_service.checks]]
   method = "GET"
   path = "/healthz"
   interval = "30s"
   timeout = "5s"
-  grace_period = "120s"
+  grace_period = "1m"
 
 [[vm]]
   memory = "2gb"
