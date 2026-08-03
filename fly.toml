@@ -1,0 +1,45 @@
+# Fly.io deployment for the Next.js + FastAPI build.
+#
+# One machine serves both halves from the Dockerfile: the exported static site
+# and the model API on the same origin. Change `primary_region` to whichever
+# Fly region is nearest the audience (`fly platform regions` lists them).
+
+app = "tax-burden-equity-analyzer"
+primary_region = "iad"
+
+# A safety net rather than headroom. Measured peak resident memory is ~1.6 GB
+# against a 2 GB machine, and the spike comes from TreeExplainer on the first
+# SHAP request. Without swap the kernel OOM-kills the process and the site dies
+# mid-demo; with it, an overshoot pages out and merely gets slower.
+swap_size_mb = 512
+
+[build]
+  dockerfile = "Dockerfile"
+
+[http_service]
+  # Matches the Dockerfile CMD, which binds ${PORT:-7860} and Fly sets no PORT.
+  internal_port = 7860
+  force_https = true
+
+  # Deliberately always-on. A stopped machine costs nothing but makes the next
+  # visitor wait through a container start, a 276 MB artifact fetch and a ~5s
+  # model load. This app exists to be clicked once by someone who will not wait.
+  auto_stop_machines = "off"
+  auto_start_machines = true
+  min_machines_running = 1
+
+# Startup blocks in the FastAPI lifespan hook until the forest is downloaded
+# and warm, so the port stays closed for roughly 40s on a cold boot. The grace
+# period has to outlast that or Fly kills a machine that is merely busy being
+# born.
+[[http_service.checks]]
+  method = "GET"
+  path = "/healthz"
+  interval = "30s"
+  timeout = "5s"
+  grace_period = "120s"
+
+[[vm]]
+  memory = "2gb"
+  cpus = 1
+  cpu_kind = "shared"
