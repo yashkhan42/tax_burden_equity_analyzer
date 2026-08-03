@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import os
 from contextlib import asynccontextmanager
@@ -77,19 +78,32 @@ def _safe_model_error() -> dict:
 def create_app(*, warm_on_startup: bool = True) -> FastAPI:
     readiness = Readiness()
 
+    async def _become_ready() -> None:
+        source: ArtifactSource | None = None
+        try:
+            source = await run_in_threadpool(bootstrap_artifact)
+            if source is not None:
+                await run_in_threadpool(warm_model)
+                readiness.set(True, source)
+        except Exception:
+            logger.exception("The analysis model did not become ready.")
+            readiness.set(False, source)
+
     @asynccontextmanager
     async def lifespan(app: FastAPI):
-        if warm_on_startup:
-            source: ArtifactSource | None = None
-            try:
-                source = await run_in_threadpool(bootstrap_artifact)
-                if source is not None:
-                    await run_in_threadpool(warm_model)
-                    readiness.set(True, source)
-            except Exception:
-                logger.exception("The analysis model did not become ready.")
-                readiness.set(False, source)
-        yield
+        # Warming happens *beside* the server, not before it. Fetching the
+        # artifact and exercising every model path costs ~1.7 GB and the better
+        # part of a minute on a cold container; doing that inside the lifespan
+        # hook keeps the listening socket closed for the whole time, so a
+        # platform health check sees a dead port and destroys the machine while
+        # it is still starting up. Binding first and reporting "degraded" until
+        # the model lands is both honest and survivable.
+        task = asyncio.create_task(_become_ready()) if warm_on_startup else None
+        try:
+            yield
+        finally:
+            if task is not None and not task.done():
+                task.cancel()
 
     app = FastAPI(
         title="Tax burden equity analyzer",
@@ -156,6 +170,19 @@ def create_app(*, warm_on_startup: bool = True) -> FastAPI:
             return function(*args)
         except ValueError as error:
             raise InvalidProfileError from error
+
+    @app.get("/livez")
+    def livez() -> dict[str, str]:
+        """Liveness, deliberately separate from readiness.
+
+        Answers "is this process alive", which is the only question a platform
+        health check should ask -- it decides whether to destroy the machine.
+        Readiness ("can it answer model questions yet") is /healthz, and during
+        the first minute of a cold boot the honest answer there is no. Pointing
+        an infrastructure check at readiness would kill the container for the
+        crime of still loading.
+        """
+        return {"status": "alive"}
 
     @app.get("/healthz", response_model=HealthResponse)
     def healthz(request: Request):

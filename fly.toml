@@ -7,10 +7,10 @@
 app = "tax-burden-equity-analyzer"
 primary_region = "iad"
 
-# A safety net rather than headroom. Measured peak resident memory is ~1.6 GB
-# against a 2 GB machine, and the spike comes from TreeExplainer on the first
-# SHAP request. Without swap the kernel OOM-kills the process and the site dies
-# mid-demo; with it, an overshoot pages out and merely gets slower.
+# A safety net rather than headroom. Warming every model path peaks at a
+# measured 1,656 MB, and TreeExplainer is most of it. Without swap the kernel
+# OOM-kills the process and the site dies mid-demo; with it, an overshoot pages
+# out and merely gets slower.
 swap_size_mb = 512
 
 [build]
@@ -28,17 +28,16 @@ swap_size_mb = 512
   auto_start_machines = true
   min_machines_running = 1
 
-# Startup blocks in the FastAPI lifespan hook until the forest is downloaded
-# and warm, so the port stays closed for roughly 25-40s on a cold boot and the
-# check has to not fire until after that. One minute is Fly's ceiling here --
-# anything larger is silently clamped, so it is set explicitly rather than
-# asking for a value that will not be honoured.
+# Liveness, not readiness. /livez answers as soon as the process is up, while
+# the model downloads and warms in the background; /healthz stays 503 until the
+# model can actually answer. Checking readiness here would destroy the machine
+# for still loading, which is exactly how the first deploy failed.
 [[http_service.checks]]
   method = "GET"
-  path = "/healthz"
-  interval = "30s"
+  path = "/livez"
+  interval = "15s"
   timeout = "5s"
-  grace_period = "1m"
+  grace_period = "20s"
 
 [[vm]]
   memory = "2gb"
