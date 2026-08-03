@@ -119,14 +119,19 @@ def bootstrap_artifact() -> ArtifactSource | None:
     if destination.is_file():
         return "local"
 
-    url = os.environ.get("TAX_MODEL_DOWNLOAD_URL")
+    # Resolve through the helper rather than reading the environment directly:
+    # it falls back to the URL committed in the model metadata, which is the
+    # documented way a host with no configuration still finds the artifact.
+    # Reading TAX_MODEL_DOWNLOAD_URL here instead meant any deployment without
+    # that variable set silently returned None and stayed degraded forever,
+    # with the published release sitting right there in rf_metrics.json.
+    url = configured_download_url()
     if not url:
         return None
-    token = os.environ.get("TAX_MODEL_DOWNLOAD_TOKEN") or os.environ.get("GITHUB_TOKEN")
     download_artifact(
         url=url,
         destination=destination,
         metadata_path=DEFAULT_METADATA,
-        token=token,
+        token=download_token(),
     )
     return "downloaded"
