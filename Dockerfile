@@ -44,7 +44,11 @@ WORKDIR /app
 # baked in -- it is fetched from the public GitHub Release on first boot and
 # verified against the checksum in rf_metrics.json.
 COPY backend/ ./backend/
-COPY model_interface.py ./
+# model_interface imports codebook for its reader-facing labels, so the API
+# needs both. This is the whole root-level closure from backend/ -- app.py,
+# charts.py, viz.py and page_style.py belong to the Streamlit fallback and are
+# deliberately absent.
+COPY model_interface.py codebook.py ./
 COPY models/rf_metrics.json ./models/
 COPY data/processed/freeze_manifest.json ./data/processed/
 COPY data/processed/train.csv ./data/processed/
@@ -56,6 +60,13 @@ COPY --from=web /build/frontend/out ./frontend/out
 # /app, and the artifact has to land somewhere writable on first boot.
 ENV TAX_MODEL_PATH=/tmp/rf_eff_rate.joblib
 ENV PYTHONUNBUFFERED=1
+
+# Import the app at build time so a missing module fails the build instead of
+# crash-looping the machine on boot, where the only symptom is an unreachable
+# host. This is cheap -- create_app() builds routes and mounts static files but
+# never loads the forest, which stays lazy behind an lru_cache. A missing
+# codebook.py shipped a green build and a dead deploy; this closes that gap.
+RUN TAX_MODEL_FETCH=0 python -c "import backend.main; print('import OK')"
 
 EXPOSE 7860
 CMD ["sh", "-c", "uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-7860}"]
