@@ -1,0 +1,25 @@
+# Keep the build context small and, more importantly, keep local development
+# state out of the image. frontend/.env.local points the site at
+# http://localhost:8000; if it reached the web build stage it would be baked
+# into the bundle and the deployed page would call the developer's laptop.
+frontend/.env.local
+frontend/.env*.local
+frontend/node_modules
+frontend/.next
+frontend/out
+
+.venv
+__pycache__
+*.pyc
+.git
+.pytest_cache
+
+# The forest is fetched and checksum-verified at boot, never shipped in the
+# image. Everything below is analysis output the API never reads.
+models/*.joblib
+notebooks/
+reports/
+data/raw/
+components/
+grounding/
+tests/

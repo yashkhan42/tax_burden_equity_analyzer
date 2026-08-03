@@ -6,12 +6,14 @@ import logging
 import os
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
+from pathlib import Path
 from threading import RLock
 
 from fastapi import Depends, FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from starlette.concurrency import run_in_threadpool
 
 import model_interface as mi
@@ -193,6 +195,21 @@ def create_app(*, warm_on_startup: bool = True) -> FastAPI:
         body: TwinRequest, _: None = Depends(require_ready)
     ) -> TwinResponse:
         return invoke(twin, body.profile, body.comparison)
+
+    # The exported Next.js site, served from this same process when it has been
+    # built. Same origin as the API, so the browser needs no CORS grant and
+    # there is no HTTP/HTTPS mixed-content edge to get wrong. Mounted last so
+    # the API routes above always win the match; absent in a bare API
+    # deployment, where this is simply skipped.
+    web_root = Path(
+        os.environ.get("TAX_WEB_DIR")
+        or Path(__file__).resolve().parent.parent / "frontend" / "out"
+    )
+    if (web_root / "index.html").is_file():
+        app.mount("/", StaticFiles(directory=web_root, html=True), name="web")
+        logger.info("Serving the exported web UI from %s", web_root)
+    else:
+        logger.info("No exported web UI at %s; serving the API only.", web_root)
 
     return app
 
